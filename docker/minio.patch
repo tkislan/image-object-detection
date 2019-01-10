@@ -1,0 +1,13 @@
+diff --git a/minio/api.py b/minio/api.py
+index 3c52fb0..43f16e5 100644
+--- a/minio/api.py
++++ b/minio/api.py
+@@ -512,6 +512,8 @@ class Minio(object):
+             try:
+                 for line in response.stream():
+                     if line.strip():
++                        if hasattr(line, 'decode'):
++                            line = line.decode('utf-8')
+                         event = json.loads(line)
+                         if event['Records'] is not None:
+                             yield event
