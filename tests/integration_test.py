@@ -13,7 +13,7 @@ from detection.session import create_detection_session
 from minio_utils.client import create_client, make_bucket_if_not_exists
 from minio_utils.events import MinioEventThread, iterate_objects
 from minio_utils.metadata import normalize_metadata
-from .test_utils import get_random_bucket_name, purge_bucket
+from tests.test_utils import get_random_bucket_name, purge_bucket
 
 DATA_IMG_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'img')
 IMAGE_PATH = os.path.join(DATA_IMG_DIR, 'street.jpg')

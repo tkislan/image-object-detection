@@ -19,7 +19,6 @@ services:
       MINIO_BUCKET_NAME: imagedetection
     working_dir: /root/app
     depends_on:
-      - mosquitto
       - minio
 
   minio:

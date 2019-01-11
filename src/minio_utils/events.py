@@ -69,7 +69,7 @@ class MinioEventThread(threading.Thread):
                     self.__q.put(event)
             except json.JSONDecodeError:
                 response.close()
-            except AttributeError as e:
+            except AttributeError:
                 break
 
     def stop(self):

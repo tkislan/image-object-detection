@@ -21,4 +21,3 @@ class DetectionTest(unittest.TestCase):
 
         self.assertEqual((480, 640, 3), detected_image.shape)
         self.assertListEqual(['car', 'person'], sorted(classes))
-

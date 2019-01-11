@@ -21,5 +21,3 @@ def load_image(file_path: str) -> np.array:
 def save_image(image: np.array, file_path: str):
     im = Image.fromarray(image)
     im.save(file_path)
-
-

@@ -5,7 +5,7 @@ from queue import Queue
 
 from minio_utils.client import create_client, make_bucket_if_not_exists
 from minio_utils.events import MinioEventThread
-from .test_utils import purge_bucket, get_random_bucket_name
+from tests.test_utils import purge_bucket, get_random_bucket_name
 
 
 class MinioBucketTest(unittest.TestCase):
