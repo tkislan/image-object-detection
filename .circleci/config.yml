@@ -19,6 +19,10 @@ jobs:
       - checkout
 
       - run:
+          name: Set PYTHONPATH environment variable
+          command: echo 'export PYTHONPATH=${PYTHONPATH}:${HOME}/project/src' >> $BASH_ENV
+
+      - run:
           name: Install Test dependencies
           command: pip install flake8
 
