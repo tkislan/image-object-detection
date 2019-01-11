@@ -7,7 +7,7 @@ import tensorflow as tf
 from detection.detection import detect
 from detection.image import load_image, save_image
 from minio_utils.config import BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX
-from minio_utils.client import create_client, make_bucket_if_not_exists
+from minio_utils.client import create_client
 from detection.session import create_detection_session
 from minio_utils.events import MinioEventThread, iterate_objects
 from minio_utils.metadata import normalize_metadata
