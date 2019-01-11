@@ -14,6 +14,7 @@ def get_minio_notification_response(mc, bucket_name: str, prefix: str):
         'suffix': '.*',
         'events': ['s3:ObjectCreated:*'],
     }
+    # noinspection PyProtectedMember
     return mc._url_open('GET', bucket_name=bucket_name, query=query, preload_content=False)
 
 

@@ -3,7 +3,7 @@ FROM python:3.5.6 as builder
 RUN pip install --no-binary pillow pillow
 
 RUN git clone https://github.com/tensorflow/models.git /root/tensorflow_models && \
-    (cd $HOME/tensorflow_models && git reset --hard 2c4dc0c00aba5dde21923dd4f8aa1584e8ec67af)
+    (cd /root/tensorflow_models && git reset --hard 2c4dc0c00aba5dde21923dd4f8aa1584e8ec67af)
 RUN rm -rf /root/tensorflow_models/.git
 
 RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protobuf-python-3.6.1.tar.gz \

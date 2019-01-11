@@ -71,8 +71,6 @@ def detection_loop(q: Queue, bucket_name: str, input_prefix: str, output_prefix:
     tf_sess = create_detection_session(DETECTION_MODEL_PATH)
     mc = create_client()
 
-    make_bucket_if_not_exists(mc, bucket_name)
-
     objects = mc.list_objects_v2(bucket_name, prefix=input_prefix)
     for obj in objects:
         safe_process_file_object(mc, tf_sess, obj.bucket_name, obj.object_name, output_prefix)
