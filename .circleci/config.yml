@@ -14,7 +14,7 @@ jobs:
       MINIO_ACCESS_KEY: SO9KNO6YT9OGE39PQCZW
       MINIO_SECRET_KEY: EzH5iGs3qbJr1MwIMf2AUyfqzewgd2qgrk9+i+vU
       MINIO_BUCKET_NAME: imagedetection
-    working_directory: ~/app
+    working_directory: ~/project
     steps:
       - checkout
 
