@@ -1,31 +1,30 @@
 FROM python:3.5.6 as builder
 
+RUN apt-get update && \
+    apt-get install -y zip && \
+    rm -rf /var/lib/{apt,dpkg,cache,log}/
 RUN pip install --no-binary pillow pillow
 
+RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip \
+        -o /tmp/protoc-3.6.1-linux-x86_64.zip && \
+    mkdir -p /tmp/protoc && \
+    unzip -q /tmp/protoc-3.6.1-linux-x86_64.zip -d /tmp/protoc && \
+    mv /tmp/protoc/bin/protoc /usr/bin/protoc
+
 RUN git clone https://github.com/tensorflow/models.git /root/tensorflow_models && \
-    (cd /root/tensorflow_models && git reset --hard 2c4dc0c00aba5dde21923dd4f8aa1584e8ec67af)
+    (cd /root/tensorflow_models && git reset --hard b36872b66fab34fbf71d22388709de5cd81878b4)
 RUN rm -rf /root/tensorflow_models/.git
-
-RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protobuf-python-3.6.1.tar.gz \
-        -o /tmp/protobuf-python.tar.gz
-
-RUN tar -xzf /tmp/protobuf-python.tar.gz -C /tmp
-
-RUN (cd /tmp/protobuf-3.6.1 && ./autogen.sh && ./configure && make && make install)
-RUN ldconfig
-#RUN (cd /tmp/protobuf-3.6.1 && ./autogen.sh && ./configure && make -C src protoc && find . -name protoc && which exit)
-RUN rm -r /tmp/protobuf-3.6.1
 
 RUN (cd /root/tensorflow_models/research && protoc object_detection/protos/*.proto --python_out=.)
 
 FROM python:3.5.6-slim
 
-ADD docker/minio.patch /docker/
+#ADD docker/minio.patch /docker/
 
 RUN apt-get update && \
     apt-get install -y libtiff5 libjpeg62-turbo zlib1g libfreetype6 liblcms2-2 libwebp6 libopenjp2-7 patch && \
     pip install tensorflow==1.12.0 pillow matplotlib minio && \
-    (cd /usr/local/lib/python3.5/site-packages/minio && patch -p2 < /docker/minio.patch) && \
+#    (cd /usr/local/lib/python3.5/site-packages/minio && patch -p2 < /docker/minio.patch) && \
     rm -rf /var/lib/{apt,dpkg,cache,log}/ && \
     rm -r /root/.cache/pip
 

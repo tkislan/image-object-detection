@@ -1,3 +1,4 @@
 .idea
 __docker
 *.pyc
+.DS_Store

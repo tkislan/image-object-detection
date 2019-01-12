@@ -56,7 +56,7 @@ def get_class_name(cls):
 
 
 def filter_classes(output_dict, classes: List[str], threshold):
-    test = list(
+    detection_values = list(
         zip(
             output_dict['detection_boxes'],
             output_dict['detection_classes'],
@@ -64,9 +64,15 @@ def filter_classes(output_dict, classes: List[str], threshold):
         )
     )
 
-    test = [(box, cls, score) for (box, cls, score) in test if score > threshold and get_class_name(cls) in classes]
+    detection_values = [
+        (box, cls, score) for (box, cls, score) in detection_values
+        if score > threshold and get_class_name(cls) in classes
+    ]
 
-    boxes, classes, scores = [np.array(list(t)) for t in zip(*test)]
+    if len(detection_values) == 0:
+        return np.array([]), np.array([]), np.array([])
+
+    boxes, classes, scores = [np.array(list(t)) for t in zip(*detection_values)]
     return boxes, classes, scores
 
 
