@@ -50,11 +50,7 @@ class MinioEventThread(threading.Thread):
         self.start()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        print('Stopping event thread')
         self.stop()
-        print('Joining event thread')
-        self.join()
-        print('Event thread joined')
 
     def run(self):
         print('Running MinioEventThread')
@@ -74,9 +70,15 @@ class MinioEventThread(threading.Thread):
                 break
 
     def stop(self):
+        print('Stopping event thread')
+
         if self.__event_stream_it is not None:
             self.__event_stream_it.close()
             self.__event_stream_it = None
+
+        print('Joining event thread')
+        self.join()
+        print('Event thread joined')
 
 
 def iterate_objects(event):

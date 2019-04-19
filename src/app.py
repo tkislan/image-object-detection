@@ -31,11 +31,11 @@ def process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: s
         ret = mc.fget_object(bucket_name, key, tmp_input_file_path)
 
         try:
-            image = load_image(tmp_input_file_path)
+            image_np = load_image(tmp_input_file_path)
         finally:
             os.remove(tmp_input_file_path)
 
-        image, classes = detect(tf_sess, image)
+        image_np, classes = detect(tf_sess, image_np)
 
         input_metadata = normalize_metadata(ret.metadata)
         metadata = {
@@ -44,7 +44,7 @@ def process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: s
         }
 
         try:
-            save_image(image, tmp_output_file_path)
+            save_image(image_np, tmp_output_file_path)
 
             mc.fput_object(
                 bucket_name,

@@ -22,7 +22,7 @@ INVALID_IMAGE_PATH = os.path.join(DATA_IMG_DIR, 'invalid.txt')
 
 class TemporaryFileName:
     def __enter__(self):
-        fd, self.__file_path = tempfile.mkstemp()
+        fd, self.__file_path = tempfile.mkstemp(suffix='jpg')
         os.close(fd)
         return self.__file_path
 
