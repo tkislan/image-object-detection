@@ -43,6 +43,7 @@ COPY --from=builder \
     /root/tensorflow_models/research/slim \
     /root/tensorflow_models/research/slim
 
+ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/root/tensorflow_models/research:/root/tensorflow_models/research/slim
 
 ADD src/ /root/app
