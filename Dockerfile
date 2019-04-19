@@ -3,7 +3,7 @@ FROM python:3.5.6 as builder
 RUN apt-get update && \
     apt-get install -y zip && \
     rm -rf /var/lib/{apt,dpkg,cache,log}/
-RUN pip install --no-binary pillow pillow
+RUN pip install --no-binary pillow pillow==5.4.1
 
 RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip \
         -o /tmp/protoc-3.6.1-linux-x86_64.zip && \
@@ -23,7 +23,7 @@ FROM python:3.5.6-slim
 
 RUN apt-get update && \
     apt-get install -y libtiff5 libjpeg62-turbo zlib1g libfreetype6 liblcms2-2 libwebp6 libopenjp2-7 patch && \
-    pip install tensorflow==1.12.0 pillow matplotlib minio && \
+    pip install tensorflow==1.12.0 pillow==5.4.1 matplotlib minio && \
 #    (cd /usr/local/lib/python3.5/site-packages/minio && patch -p2 < /docker/minio.patch) && \
     rm -rf /var/lib/{apt,dpkg,cache,log}/ && \
     rm -r /root/.cache/pip
