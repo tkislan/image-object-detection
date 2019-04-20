@@ -12,7 +12,6 @@ from detection.image import load_image
 from detection.session import create_detection_session
 from minio_utils.client import create_client, make_bucket_if_not_exists
 from minio_utils.events import MinioEventThread, iterate_objects
-from minio_utils.metadata import normalize_metadata
 from tests.test_utils import get_random_bucket_name, purge_bucket
 
 DATA_IMG_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'img')
@@ -40,7 +39,7 @@ class IntegrationTest(unittest.TestCase):
         self.image_name = 'test.jpg'
         self.object_name = os.path.join(self.input_prefix, self.image_name)
         self.output_object_name = os.path.join(self.output_prefix, self.image_name)
-        self.metadata = {'mqtt_topic': 'sensor/camera1'}
+        self.metadata = {'x-amz-meta-mqtt_topic': 'sensor/camera1'}
 
         make_bucket_if_not_exists(self.mc, self.bucket_name)
 
@@ -52,14 +51,14 @@ class IntegrationTest(unittest.TestCase):
     def check_image_output(self):
         with TemporaryFileName() as tmpfile:
             ret = self.mc.fget_object(self.bucket_name, self.output_object_name, tmpfile)
-            tmp_image_metadata = normalize_metadata(ret.metadata)
+            tmp_image_metadata = ret.metadata
 
             tmp_image = load_image(tmpfile)
 
             self.assertEqual((480, 640, 3), tmp_image.shape)
-            self.assertListEqual(sorted(list(self.metadata.keys()) + ['classes']), sorted(tmp_image_metadata.keys()))
-            self.assertEqual(self.metadata['mqtt_topic'], tmp_image_metadata['mqtt_topic'])
-            self.assertListEqual(['car', 'person'], sorted(tmp_image_metadata['classes'].split(',')))
+            self.assertListEqual(sorted(list(self.metadata.keys()) + ['x-amz-meta-classes']), sorted(tmp_image_metadata.keys()))
+            self.assertEqual(self.metadata['x-amz-meta-mqtt_topic'], tmp_image_metadata['x-amz-meta-mqtt_topic'])
+            self.assertListEqual(['car', 'person'], sorted(tmp_image_metadata['x-amz-meta-classes'].split(',')))
 
     def wait_check_image_output(self, timeout=30):
         i = 0

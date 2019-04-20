@@ -10,7 +10,6 @@ from minio_utils.config import BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX
 from minio_utils.client import create_client
 from detection.session import create_detection_session
 from minio_utils.events import MinioEventThread, iterate_objects
-from minio_utils.metadata import normalize_metadata
 from utils.signal_listener import SignalListener
 
 DETECTION_MODEL_PATH = os.environ.get('DETECTION_MODEL_PATH')
@@ -40,9 +39,8 @@ def process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: s
         image_np, classes = detect(tf_sess, image_np)
         print('Detected classes: {}'.format(','.join(classes)))
 
-        input_metadata = normalize_metadata(ret.metadata)
         metadata = {
-            **input_metadata,
+            **(ret.metadata or {}),
             "x-amz-meta-classes": ','.join(classes),
         }
 
