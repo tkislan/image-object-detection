@@ -39,7 +39,7 @@ class IntegrationTest(unittest.TestCase):
         self.image_name = 'test.jpg'
         self.object_name = os.path.join(self.input_prefix, self.image_name)
         self.output_object_name = os.path.join(self.output_prefix, self.image_name)
-        self.metadata = {'x-amz-meta-mqtt_topic': 'sensor/camera1'}
+        self.metadata = {'X-Amz-Meta-Mqtt_topic': 'sensor/camera1'}
 
         make_bucket_if_not_exists(self.mc, self.bucket_name)
 
@@ -56,9 +56,9 @@ class IntegrationTest(unittest.TestCase):
             tmp_image = load_image(tmpfile)
 
             self.assertEqual((480, 640, 3), tmp_image.shape)
-            self.assertListEqual(sorted(list(self.metadata.keys()) + ['x-amz-meta-classes']), sorted(tmp_image_metadata.keys()))
-            self.assertEqual(self.metadata['x-amz-meta-mqtt_topic'], tmp_image_metadata['x-amz-meta-mqtt_topic'])
-            self.assertListEqual(['car', 'person'], sorted(tmp_image_metadata['x-amz-meta-classes'].split(',')))
+            self.assertListEqual(sorted(list(self.metadata.keys()) + ['X-Amz-Meta-Classes', 'Content-Type']), sorted(tmp_image_metadata.keys()))
+            self.assertEqual(self.metadata['X-Amz-Meta-Mqtt_topic'], tmp_image_metadata['X-Amz-Meta-Mqtt_topic'])
+            self.assertListEqual(['car', 'person'], sorted(tmp_image_metadata['X-Amz-Meta-Classes'].split(',')))
 
     def wait_check_image_output(self, timeout=30):
         i = 0
