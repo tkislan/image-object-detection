@@ -54,7 +54,7 @@ def process_file_object(
         try:
             save_image(image_np, tmp_output_file_path)
 
-            output_key = key.replace(input_prefix, output_prefix, count=1)
+            output_key = key.replace(input_prefix, output_prefix, 1)
 
             print('Uploading file to: {}'.format(output_key))
             mc.fput_object(
