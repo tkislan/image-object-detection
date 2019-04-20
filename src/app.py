@@ -28,6 +28,7 @@ def process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: s
         tmp_input_file_path = os.path.join('/tmp', file_name)
         tmp_output_file_path = os.path.join('/tmp', 'output_' + file_name)
 
+        print('Downloading file: {}'.format(key))
         ret = mc.fget_object(bucket_name, key, tmp_input_file_path)
 
         try:
@@ -35,7 +36,9 @@ def process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: s
         finally:
             os.remove(tmp_input_file_path)
 
+        print('Detecting objects in file: {}'.format(tmp_input_file_path))
         image_np, classes = detect(tf_sess, image_np)
+        print('Detected classes: {}'.format(','.join(classes)))
 
         input_metadata = normalize_metadata(ret.metadata)
         metadata = {
@@ -46,9 +49,12 @@ def process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: s
         try:
             save_image(image_np, tmp_output_file_path)
 
+            output_key = os.path.join(output_prefix, file_name)
+
+            print('Uploading file to: {}'.format(output_key))
             mc.fput_object(
                 bucket_name,
-                os.path.join(output_prefix, file_name),
+                output_key,
                 tmp_output_file_path,
                 metadata=metadata
             )
