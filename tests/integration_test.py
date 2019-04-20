@@ -85,7 +85,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertIsNotNone(event)
 
         bucket_name, key = next(iterate_objects(event))
-        process_file_object(self.mc, self.tf_sess, bucket_name, key, self.output_prefix)
+        process_file_object(self.mc, self.tf_sess, bucket_name, key, self.input_prefix, self.output_prefix)
 
         self.check_image_output()
 
@@ -104,7 +104,7 @@ class IntegrationTest(unittest.TestCase):
         bucket_name, key = next(iterate_objects(event))
 
         with self.assertRaises(OSError):
-            process_file_object(self.mc, self.tf_sess, bucket_name, key, self.output_prefix)
+            process_file_object(self.mc, self.tf_sess, bucket_name, key, self.input_prefix, self.output_prefix)
 
     def test_app_listener(self):
         q = Queue()
