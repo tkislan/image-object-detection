@@ -37,6 +37,7 @@ def process_file_object(
         print('Downloading file: {}'.format(key))
         ret = mc.fget_object(bucket_name, key, tmp_input_file_path)
 
+        print('Loading image into memory')
         try:
             image_np = load_image(tmp_input_file_path)
         finally:
