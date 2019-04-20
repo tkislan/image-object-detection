@@ -18,7 +18,14 @@ if DETECTION_MODEL_PATH is None:
     raise ValueError('DETECTION_MODEL_PATH environment variable missing')
 
 
-def process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: str, output_prefix: str):
+def process_file_object(
+    mc: Minio,
+    tf_sess: tf.Session,
+    bucket_name: str,
+    key: str,
+    input_prefix: str,
+    output_prefix: str
+):
     file_name = os.path.basename(key)
 
     print('Processing file: {}'.format(key))
@@ -47,7 +54,7 @@ def process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: s
         try:
             save_image(image_np, tmp_output_file_path)
 
-            output_key = os.path.join(output_prefix, file_name)
+            output_key = key.replace(input_prefix, output_prefix, count=1)
 
             print('Uploading file to: {}'.format(output_key))
             mc.fput_object(
@@ -64,9 +71,16 @@ def process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: s
     print('Finished processing file')
 
 
-def safe_process_file_object(mc: Minio, tf_sess: tf.Session, bucket_name: str, key: str, output_prefix: str):
+def safe_process_file_object(
+    mc: Minio,
+    tf_sess: tf.Session,
+    bucket_name: str,
+    key: str,
+    input_prefix: str,
+    output_prefix: str
+):
     try:
-        process_file_object(mc, tf_sess, bucket_name, key, output_prefix)
+        process_file_object(mc, tf_sess, bucket_name, key, input_prefix, output_prefix)
     except OSError as os_error:  # Ignore and log invalid images
         print(os_error)
 
@@ -77,7 +91,7 @@ def detection_loop(q: Queue, bucket_name: str, input_prefix: str, output_prefix:
 
     objects = mc.list_objects_v2(bucket_name, prefix=input_prefix)
     for obj in objects:
-        safe_process_file_object(mc, tf_sess, obj.bucket_name, obj.object_name, output_prefix)
+        safe_process_file_object(mc, tf_sess, obj.bucket_name, obj.object_name, input_prefix, output_prefix)
 
     while True:
         event = q.get()
@@ -85,7 +99,7 @@ def detection_loop(q: Queue, bucket_name: str, input_prefix: str, output_prefix:
             break
 
         for obj_bucket_name, obj_key in iterate_objects(event):
-            safe_process_file_object(mc, tf_sess, obj_bucket_name, obj_key, output_prefix)
+            safe_process_file_object(mc, tf_sess, obj_bucket_name, obj_key, input_prefix, output_prefix)
 
 
 def main():
