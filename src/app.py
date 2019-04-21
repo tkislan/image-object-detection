@@ -54,7 +54,7 @@ def process_file_object(
 
         metadata = {
             **(ret.metadata or {}),
-            "x-amz-meta-classes": classes,
+            "x-amz-meta-classes": ','.join(classes),
         }
 
         try:
