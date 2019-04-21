@@ -28,4 +28,4 @@ services:
       MINIO_ACCESS_KEY: SO9KNO6YT9OGE39PQCZW
       MINIO_SECRET_KEY: EzH5iGs3qbJr1MwIMf2AUyfqzewgd2qgrk9+i+vU
     ports:
-      - 9000:9000
+      - 19000:9000
