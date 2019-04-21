@@ -10,7 +10,10 @@ def convert_image_to_array(image):
 
 
 def load_image(file_path: str) -> np.array:
+    print('Opening image')
     image = Image.open(file_path)
+
+    print('Converting image to array')
     # the array based representation of the image will be used later in order to prepare the
     # result image with boxes and labels on it.
     image_np = convert_image_to_array(image)
