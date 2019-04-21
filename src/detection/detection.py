@@ -9,7 +9,7 @@ from detection.category_index import category_index
 from detection.visualizer import visualize
 
 DEFAULT_DETECTION_CLASSES = ["person", "car", "cat"]
-DEFAULT_DETECTION_THRESHOLD = 0.7
+DEFAULT_DETECTION_THRESHOLD = 0.8
 
 
 def run_inference(sess: tf.Session, image: np.array) -> dict:
