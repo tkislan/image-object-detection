@@ -2,6 +2,7 @@ import os
 from queue import Queue
 
 from minio import Minio
+from minio.error import NoSuchKey
 import tensorflow as tf
 
 from detection.detection import detect
@@ -35,7 +36,11 @@ def process_file_object(
         tmp_output_file_path = os.path.join('/tmp', 'output_' + file_name)
 
         print('Downloading file: {}'.format(key))
-        ret = mc.fget_object(bucket_name, key, tmp_input_file_path)
+        try:
+            ret = mc.fget_object(bucket_name, key, tmp_input_file_path)
+        except NoSuchKey:
+            print('File not found, ignoring')
+            return
 
         print('Loading image into memory')
         try:
