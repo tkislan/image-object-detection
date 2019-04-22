@@ -51,7 +51,6 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/root/tensorflow_models/research:/root/tensorflow_models/research/slim
 
 ADD src/ /root/app
-#ADD models /root/models
 COPY --from=builder \
     /tmp/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb \
     /root/models/ssd_resnet50_v1_coco.pb
