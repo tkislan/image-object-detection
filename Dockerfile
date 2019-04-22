@@ -19,6 +19,7 @@ RUN (cd /root/tensorflow_models/research && protoc object_detection/protos/*.pro
 
 RUN curl http://download.tensorflow.org/models/object_detection/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz \
     -o /tmp/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
+RUN mkdir -p /tmp/ssd_resnet50_v1
 RUN tar -xzf /tmp/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz -C /tmp/ssd_resnet50_v1
 
 FROM python:3.5.6-slim
