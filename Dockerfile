@@ -19,8 +19,7 @@ RUN (cd /root/tensorflow_models/research && protoc object_detection/protos/*.pro
 
 RUN curl http://download.tensorflow.org/models/object_detection/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz \
     -o /tmp/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
-RUN mkdir -p /tmp/ssd_resnet50_v1
-RUN tar -xzf /tmp/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz -C /tmp/ssd_resnet50_v1
+RUN tar -xzf /tmp/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz -C /tmp
 
 FROM python:3.5.6-slim
 
@@ -54,7 +53,7 @@ ENV PYTHONPATH=/root/tensorflow_models/research:/root/tensorflow_models/research
 ADD src/ /root/app
 #ADD models /root/models
 COPY --from=builder \
-    /tmp/ssd_resnet50_v1/frozen_inference_graph.pb \
+    /tmp/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03/frozen_inference_graph.pb \
     /root/models/ssd_resnet50_v1_coco.pb
 
 ENV DETECTION_MODEL_PATH=/root/models/ssd_resnet50_v1_coco.pb
