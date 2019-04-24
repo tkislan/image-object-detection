@@ -17,9 +17,13 @@ RUN rm -rf /root/tensorflow_models/.git
 
 RUN (cd /root/tensorflow_models/research && protoc object_detection/protos/*.proto --python_out=.)
 
-RUN curl http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
-    -o /tmp/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
-RUN tar -xzf /tmp/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz -C /tmp
+#RUN curl http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
+#    -o /tmp/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
+#RUN tar -xzf /tmp/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz -C /tmp
+RUN curl http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz \
+    -o /tmp/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
+RUN tar -xzf /tmp/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz -C /tmp
+
 
 FROM python:3.5.6-slim
 
@@ -51,10 +55,14 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/root/tensorflow_models/research:/root/tensorflow_models/research/slim
 
 ADD src/ /root/app
+#COPY --from=builder \
+#    /tmp/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb \
+#    /root/models/ssd_resnet50_v1_coco.pb
 COPY --from=builder \
-    /tmp/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb \
-    /root/models/ssd_resnet50_v1_coco.pb
+    /tmp/faster_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb \
+    /root/models/faster_rcnn_inception_v2_coco.pb
 
-ENV DETECTION_MODEL_PATH=/root/models/ssd_resnet50_v1_coco.pb
+#ENV DETECTION_MODEL_PATH=/root/models/ssd_resnet50_v1_coco.pb
+ENV DETECTION_MODEL_PATH=/root/models/faster_rcnn_inception_v2_coco.pb
 
 WORKDIR /root/app

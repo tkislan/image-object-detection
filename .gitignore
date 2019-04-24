@@ -2,3 +2,5 @@
 __docker
 *.pyc
 .DS_Store
+/__playground
+/models
