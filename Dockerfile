@@ -27,12 +27,9 @@ RUN tar -xzf /tmp/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz -C /tmp
 
 FROM python:3.5.6-slim
 
-#ADD docker/minio.patch /docker/
-
 RUN apt-get update && \
-    apt-get install -y libtiff5 libjpeg62-turbo zlib1g libfreetype6 liblcms2-2 libwebp6 libopenjp2-7 patch && \
+    apt-get install -y libtiff5 libjpeg62-turbo zlib1g libfreetype6 liblcms2-2 libwebp6 libopenjp2-7 curl && \
     pip install tensorflow==1.12.0 pillow==5.4.1 matplotlib minio && \
-#    (cd /usr/local/lib/python3.5/site-packages/minio && patch -p2 < /docker/minio.patch) && \
     rm -rf /var/lib/{apt,dpkg,cache,log}/ && \
     rm -r /root/.cache/pip
 

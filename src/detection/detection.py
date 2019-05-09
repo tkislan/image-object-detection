@@ -66,7 +66,7 @@ def filter_classes(output_dict, classes: List[str], threshold):
 
     detection_values = [
         (box, cls, score) for (box, cls, score) in detection_values
-        if score > threshold and get_class_name(cls) in classes
+        if score >= threshold and get_class_name(cls) in classes
     ]
 
     if len(detection_values) == 0:

@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  run_tests:
     docker:
       - image: tkislan/image-object-detection
       - image: minio/minio:RELEASE.2018-12-27T18-33-08Z
@@ -37,3 +37,17 @@ jobs:
       - run:
           name: Run tests
           command: python -m unittest discover tests "*_test.py"
+
+  build_images:
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+          version: 18.09.3
+
+      - checkout
+
+      - run:
+          name: Build Image
+          command: docker build -t tkislan/image-object-detection .
+
+

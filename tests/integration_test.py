@@ -56,7 +56,10 @@ class IntegrationTest(unittest.TestCase):
             tmp_image = load_image(tmpfile)
 
             self.assertEqual((480, 640, 3), tmp_image.shape)
-            self.assertListEqual(sorted(list(self.metadata.keys()) + ['X-Amz-Meta-Classes', 'Content-Type']), sorted(tmp_image_metadata.keys()))
+            self.assertListEqual(
+                sorted(list(self.metadata.keys()) + ['X-Amz-Meta-Classes', 'Content-Type']),
+                sorted(tmp_image_metadata.keys())
+            )
             self.assertEqual(self.metadata['X-Amz-Meta-Mqtt_topic'], tmp_image_metadata['X-Amz-Meta-Mqtt_topic'])
             self.assertListEqual(['car', 'person'], sorted(tmp_image_metadata['X-Amz-Meta-Classes'].split(',')))
 
