@@ -39,11 +39,8 @@ jobs:
           command: python -m unittest discover tests "*_test.py"
 
   build_images:
+    machine: true
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-          version: 18.09.3
-
       - checkout
 
       - run:
