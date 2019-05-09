@@ -38,7 +38,7 @@ jobs:
           name: Run tests
           command: python -m unittest discover tests "*_test.py"
 
-  build_images:
+  build_image:
     machine: true
     steps:
       - checkout

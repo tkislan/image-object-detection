@@ -4,3 +4,4 @@ __docker
 .DS_Store
 /__playground
 /models
+/src/playground.py
