@@ -52,6 +52,6 @@ workflows:
   build:
     jobs:
       - run_tests
-      - build_image
+      - build_image:
           requires:
-            - build_image
+            - run_tests
