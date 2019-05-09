@@ -47,4 +47,11 @@ jobs:
           name: Build Image
           command: docker build -t tkislan/image-object-detection .
 
-
+workflows:
+  version: 2
+  build:
+    jobs:
+      - run_tests
+      - build_image
+          requires:
+            - build_image
