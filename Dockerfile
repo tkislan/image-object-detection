@@ -44,7 +44,7 @@ COPY --from=builder \
     /opt/tensorflow_models/research/slim
 
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/opt/tensorflow_models/research:/opt/tensorflow_models/research/slim
+ENV PYTHONPATH=/opt/project/app:/opt/tensorflow_models/research:/opt/tensorflow_models/research/slim
 
 ADD image_object_detection /opt/project/app/image_object_detection
 
