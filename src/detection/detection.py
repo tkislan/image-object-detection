@@ -82,7 +82,7 @@ def detect_objects(
         threshold: float = DEFAULT_DETECTION_THRESHOLD
 ):
     output_dict = run_inference(sess, image)
-    print('output_dict: {}'.format(str(output_dict)))
+    # print('output_dict: {}'.format(str(output_dict)))
 
     return filter_classes(output_dict, DEFAULT_DETECTION_CLASSES, threshold)
 

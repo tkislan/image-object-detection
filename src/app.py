@@ -13,10 +13,11 @@ from detection.session import create_detection_session
 from minio_utils.events import MinioEventThread, iterate_objects
 from utils.signal_listener import SignalListener
 
-DETECTION_MODEL_PATH = os.environ.get('DETECTION_MODEL_PATH')
-
-if DETECTION_MODEL_PATH is None:
-    raise ValueError('DETECTION_MODEL_PATH environment variable missing')
+# DETECTION_MODEL_PATH = os.environ.get('DETECTION_MODEL_PATH')
+#
+# if DETECTION_MODEL_PATH is None:
+#     raise ValueError('DETECTION_MODEL_PATH environment variable missing')
+DETECTION_MODEL_PATH = '/root/models/model.pb'
 
 
 def process_file_object(

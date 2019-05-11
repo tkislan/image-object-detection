@@ -2,3 +2,4 @@ __docker
 __playground
 .idea
 playground*
+/models
