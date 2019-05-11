@@ -50,6 +50,10 @@ workflows:
           model_url: 'http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz'
           docker_tag: 'ssdlite-mobilenet-coco-latest'
       - build_and_test_image:
+          name: Model ssd-mobilenet-v1-coco
+          model_url: 'http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz'
+          docker_tag: 'ssd-mobilenet-coco-latest'
+      - build_and_test_image:
           name: Model faster-rcnn-inception-v2-coco
           model_url: 'http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz'
           docker_tag: 'faster-rcnn-inception-coco-latest'
