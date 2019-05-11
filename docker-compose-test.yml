@@ -6,7 +6,6 @@ services:
     stdin_open: true
     tty: true
     volumes:
-#      - ./image_object_detection:/opt/project/app/image_object_detection
       - ./tests:/opt/project/app/tests
       - ./.flake8:/opt/project/app/.flake8
     environment:

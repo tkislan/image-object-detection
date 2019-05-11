@@ -18,20 +18,28 @@ jobs:
       - checkout
 
       - run:
+          name: Docker login
+          command: docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PASS}
+
+      - run:
           name: Build image
           command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" -t ${IMAGE_NAME} .
 
       - run:
           name: Run flake8
-          command: docker-compose -f docker-compose-test.yml run app /bin/bash -c "pip install flake8 && flake8 image_object_detection tests"
+          command: docker-compose -f docker-compose-test.yml run --rm app /bin/bash -c "pip install flake8 && flake8 image_object_detection tests"
 
       - run:
           name: Run tests
-          command: docker-compose -f docker-compose-test.yml run app python -m unittest discover tests *_test.py
+          command: docker-compose -f docker-compose-test.yml run --rm app python -m unittest discover tests *_test.py
 
       - run:
           name: Tag image
           command: docker tag ${IMAGE_NAME} tkislan/image-object-detection:<< parameters.docker_tag >>
+
+      - run:
+          name: Push image
+          command: docker push tkislan/image-object-detection:<< parameters.docker_tag >>
 
 workflows:
   version: 2
