@@ -23,7 +23,7 @@ jobs:
 
       - run:
           name: Run flake8
-          command: docker-compose -f docker-compose-test.yml run app pip install flake8 && flake8 image_object_detection tests
+          command: docker-compose -f docker-compose-test.yml run app /bin/bash -c "pip install flake8 && flake8 image_object_detection tests"
 
       - run:
           name: Run tests
