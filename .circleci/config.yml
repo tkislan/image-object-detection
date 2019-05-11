@@ -1,30 +1,10 @@
 version: 2.1
 
 jobs:
-  build_base_image:
-    machine: true
-    steps:
-      - checkout
-
-      # Setup workspace directory
-      - run: mkdir -p /tmp/workspace
-
-      - run:
-          name: Build base image
-          command: docker build -t base-image-object-detection .
-
-      - run:
-          name: Save base image
-          command: docker save --output /tmp/workspace/base-image.tar base-image-object-detection
-
-      - persist_to_workspace:
-          # Must be absolute path or relative path from working_directory
-          root: /tmp/workspace
-          paths:
-            - base-image.tar
-
   build_and_test_image:
     machine: true
+    environment:
+      IMAGE_NAME: image-object-detection
     parameters:
       model_url:
         type: string
@@ -38,27 +18,30 @@ jobs:
       - checkout
 
       - run:
-          name: Load base image
-          command: docker load --input /tmp/workspace/base-image.tar
+          name: Build image
+          command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" -t ${IMAGE_NAME} .
 
       - run:
-          name: Build image
-          command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" -t tkislan/image-object-detection:<< parameters.docker_tag >> .
+          name: Run flake8
+          command: docker-compose -f docker-compose-test.yml run pip install flake8 && app flake8 image_object_detection tests
+
+      - run:
+          name: Run tests
+          command: docker-compose -f docker-compose-test.yml run app python -m unittest discover tests *_test.py
+
+      - run:
+          name: Tag image
+          command: docker tag ${IMAGE_NAME} tkislan/image-object-detection:<< parameters.docker_tag >>
 
 workflows:
   version: 2
   build:
     jobs:
-      - build_base_image
       - build_and_test_image:
           name: Model ssdlite-mobilenet-v2-coco
-          requires:
-            - build_base_image
           model_url: 'http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz'
           docker_tag: 'ssdlite-mobilenet-latest'
       - build_and_test_image:
           name: Model faster-rcnn-inception-v2-coco
-          requires:
-            - build_base_image
           model_url: 'http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz'
           docker_tag: 'faster-rcnn-inception-latest'

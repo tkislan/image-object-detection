@@ -2,7 +2,7 @@ import os
 
 from object_detection.utils import label_map_util
 
-PATH_TO_LABELS = os.path.join('/root/tensorflow_models/research/object_detection/data', 'mscoco_label_map.pbtxt')
+PATH_TO_LABELS = os.path.join('/opt/tensorflow_models/research/object_detection/data', 'mscoco_label_map.pbtxt')
 
 __category_index = None
 

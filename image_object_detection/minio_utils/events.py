@@ -5,7 +5,7 @@ from queue import Queue
 from typing import Iterator
 from urllib.parse import unquote
 
-from minio_utils.client import create_client
+from image_object_detection.minio_utils.client import create_client
 
 
 def get_minio_notification_response(mc, bucket_name: str, prefix: str):

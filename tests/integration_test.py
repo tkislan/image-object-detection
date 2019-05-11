@@ -7,11 +7,11 @@ from queue import Queue
 
 import minio
 
-from app import DETECTION_MODEL_PATH, process_file_object, detection_loop
-from detection.image import load_image
-from detection.session import create_detection_session
-from minio_utils.client import create_client, make_bucket_if_not_exists
-from minio_utils.events import MinioEventThread, iterate_objects
+from image_object_detection.app import DETECTION_MODEL_PATH, process_file_object, detection_loop
+from image_object_detection.detection.image import load_image
+from image_object_detection.detection.session import create_detection_session
+from image_object_detection.minio_utils.client import create_client, make_bucket_if_not_exists
+from image_object_detection.minio_utils.events import MinioEventThread, iterate_objects
 from tests.test_utils import get_random_bucket_name, purge_bucket
 
 DATA_IMG_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'img')

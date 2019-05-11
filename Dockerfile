@@ -11,11 +11,11 @@ RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1
     unzip -q /tmp/protoc-3.6.1-linux-x86_64.zip -d /tmp/protoc && \
     mv /tmp/protoc/bin/protoc /usr/bin/protoc
 
-RUN git clone https://github.com/tensorflow/models.git /root/tensorflow_models && \
-    (cd /root/tensorflow_models && git reset --hard b36872b66fab34fbf71d22388709de5cd81878b4)
-RUN rm -rf /root/tensorflow_models/.git
+RUN git clone https://github.com/tensorflow/models.git /opt/tensorflow_models && \
+    (cd /opt/tensorflow_models && git reset --hard b36872b66fab34fbf71d22388709de5cd81878b4)
+RUN rm -rf /opt/tensorflow_models/.git
 
-RUN (cd /root/tensorflow_models/research && protoc object_detection/protos/*.proto --python_out=.)
+RUN (cd /opt/tensorflow_models/research && protoc object_detection/protos/*.proto --python_out=.)
 
 
 FROM python:3.5.6-slim
@@ -36,25 +36,27 @@ COPY --from=builder \
     /usr/local/lib/python3.5/site-packages/PIL
 
 COPY --from=builder \
-    /root/tensorflow_models/research/object_detection \
-    /root/tensorflow_models/research/object_detection
+    /opt/tensorflow_models/research/object_detection \
+    /opt/tensorflow_models/research/object_detection
 
 COPY --from=builder \
-    /root/tensorflow_models/research/slim \
-    /root/tensorflow_models/research/slim
+    /opt/tensorflow_models/research/slim \
+    /opt/tensorflow_models/research/slim
 
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/root/tensorflow_models/research:/root/tensorflow_models/research/slim
+ENV PYTHONPATH=/opt/tensorflow_models/research:/opt/tensorflow_models/research/slim
 
-ADD src/ /root/app
+ADD image_object_detection /opt/project/app/image_object_detection
 
-WORKDIR /root/app
-
-RUN if [ -z "$MODEL_URL" ]; then exit 0; else mkdir -p /tmp/model/download && \
+RUN mkdir -p /tmp/model/download && \
     cd /tmp/model/download && \
     curl -L -O "${MODEL_URL}" && \
     mkdir -p /tmp/model/files && \
     tar -xzvf /tmp/model/download/*.tar.gz -C /tmp/model/files && \
-    mkdir -p /root/models && \
-    cp /tmp/model/files/*/frozen_inference_graph.pb /root/models/model.pb && \
+    mkdir -p /opt/models && \
+    cp /tmp/model/files/*/frozen_inference_graph.pb /opt/models/model.pb && \
     rm -r /tmp/model; fi
+
+WORKDIR /opt/project/app
+
+CMD python image_object_detection/app.py

@@ -5,8 +5,8 @@ import tensorflow as tf
 
 from object_detection.utils import ops
 
-from detection.category_index import category_index
-from detection.visualizer import visualize
+from image_object_detection.detection.category_index import category_index
+from image_object_detection.detection.visualizer import visualize
 
 DEFAULT_DETECTION_CLASSES = ["person", "car", "cat"]
 DEFAULT_DETECTION_THRESHOLD = 0.5

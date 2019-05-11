@@ -1,10 +1,10 @@
 import unittest
 import os
 
-from app import DETECTION_MODEL_PATH
-from detection.detection import detect
-from detection.image import load_image
-from detection.session import create_detection_session
+from image_object_detection.app import DETECTION_MODEL_PATH
+from image_object_detection.detection.detection import detect
+from image_object_detection.detection.image import load_image
+from image_object_detection.detection.session import create_detection_session
 
 IMAGE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'img', 'street.jpg')
 IMAGE_FULL_HD_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'img', 'street_fullhd.jpg')

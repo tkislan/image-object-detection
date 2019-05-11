@@ -5,19 +5,19 @@ from minio import Minio
 from minio.error import NoSuchKey
 import tensorflow as tf
 
-from detection.detection import detect
-from detection.image import load_image, save_image
-from minio_utils.config import BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX
-from minio_utils.client import create_client
-from detection.session import create_detection_session
-from minio_utils.events import MinioEventThread, iterate_objects
-from utils.signal_listener import SignalListener
+from image_object_detection.detection.detection import detect
+from image_object_detection.detection.image import load_image, save_image
+from image_object_detection.detection.session import create_detection_session
+from image_object_detection.minio_utils.config import BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX
+from image_object_detection.minio_utils.client import create_client
+from image_object_detection.minio_utils.events import MinioEventThread, iterate_objects
+from image_object_detection.utils.signal_listener import SignalListener
 
 # DETECTION_MODEL_PATH = os.environ.get('DETECTION_MODEL_PATH')
 #
 # if DETECTION_MODEL_PATH is None:
 #     raise ValueError('DETECTION_MODEL_PATH environment variable missing')
-DETECTION_MODEL_PATH = '/root/models/model.pb'
+DETECTION_MODEL_PATH = '/opt/models/model.pb'
 
 
 def process_file_object(

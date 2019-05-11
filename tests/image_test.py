@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from detection.image import load_image
+from image_object_detection.detection.image import load_image
 
 IMAGE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'img', 'street.jpg')
 
