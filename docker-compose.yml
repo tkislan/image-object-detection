@@ -2,12 +2,12 @@ version: '3'
 
 services:
   app:
-    image: tkislan/image-object-detection
+    image: tkislan/image-object-detection:ssdlite-mobilenet-coco-latest
     stdin_open: true
     tty: true
     volumes:
-      - ./image_object_detection:/opt/app/image_object_detection
-      - ./tests:/opt/app/tests
+      - ./image_object_detection:/opt/project/app/image_object_detection
+      - ./tests:/opt/project/app/tests
       - ./models:/opt/models
     environment:
       MINIO_HOST: minio
