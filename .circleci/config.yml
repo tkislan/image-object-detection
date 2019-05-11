@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 jobs:
   build_base_image:
@@ -20,6 +20,8 @@ jobs:
       - persist_to_workspace:
           # Must be absolute path or relative path from working_directory
           root: /tmp/workspace
+          paths:
+            - base-image.tar
 
   build_and_test_image:
     machine: true
@@ -57,6 +59,6 @@ workflows:
       - build_and_test_image:
           name: Model faster-rcnn-inception-v2-coco
           requires:
-          - build_base_image
+            - build_base_image
           model_url: 'http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz'
           docker_tag: 'faster-rcnn-inception-latest'
