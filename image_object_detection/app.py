@@ -26,7 +26,8 @@ def process_file_object(
     bucket_name: str,
     key: str,
     input_prefix: str,
-    output_prefix: str
+    output_prefix: str,
+    training_prefix: str
 ):
     file_name = os.path.basename(key)
 
@@ -45,12 +46,12 @@ def process_file_object(
 
         print('Loading image into memory')
         try:
-            image_np = load_image(tmp_input_file_path)
+            raw_image_np = load_image(tmp_input_file_path)
         finally:
             os.remove(tmp_input_file_path)
 
         print('Detecting objects in file: {}'.format(tmp_input_file_path))
-        image_np, classes = detect(tf_sess, image_np)
+        image_np, classes = detect(tf_sess, raw_image_np)
         print('Detected classes: {}'.format(','.join(classes)))
 
         if not classes:
@@ -65,12 +66,20 @@ def process_file_object(
             save_image(image_np, tmp_output_file_path)
 
             output_key = key.replace(input_prefix, output_prefix, 1)
-
             print('Uploading file to: {}'.format(output_key))
             mc.fput_object(
                 bucket_name,
                 output_key,
                 tmp_output_file_path,
+                metadata=metadata
+            )
+
+            training_output_key = key.replace(input_prefix, training_prefix, 1)
+            print('Uploading training file to: {}'.format(training_output_key))
+            mc.fput_object(
+                bucket_name,
+                training_output_key,
+                tmp_input_file_path,
                 metadata=metadata
             )
         finally:
