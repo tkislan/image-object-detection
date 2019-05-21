@@ -53,6 +53,9 @@ def process_file_object(
         image_np, classes = detect(tf_sess, image_np)
         print('Detected classes: {}'.format(','.join(classes)))
 
+        if not classes:
+            return
+
         metadata = {
             **(ret.metadata or {}),
             "x-amz-meta-classes": ','.join(classes),
