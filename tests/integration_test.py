@@ -36,6 +36,7 @@ class IntegrationTest(unittest.TestCase):
         self.bucket_name = get_random_bucket_name()
         self.input_prefix = 'test/'
         self.output_prefix = 'output_test/'
+        self.training_prefix = 'training_test/'
         self.image_name = 'test.jpg'
         self.object_name = os.path.join(self.input_prefix, self.image_name)
         self.output_object_name = os.path.join(self.output_prefix, self.image_name)
@@ -89,7 +90,15 @@ class IntegrationTest(unittest.TestCase):
         self.assertIsNotNone(event)
 
         bucket_name, key = next(iterate_objects(event))
-        process_file_object(self.mc, self.tf_sess, bucket_name, key, self.input_prefix, self.output_prefix)
+        process_file_object(
+            self.mc,
+            self.tf_sess,
+            bucket_name,
+            key,
+            self.input_prefix,
+            self.output_prefix,
+            self.training_prefix
+        )
 
         self.check_image_output()
 
@@ -108,7 +117,15 @@ class IntegrationTest(unittest.TestCase):
         bucket_name, key = next(iterate_objects(event))
 
         with self.assertRaises(OSError):
-            process_file_object(self.mc, self.tf_sess, bucket_name, key, self.input_prefix, self.output_prefix)
+            process_file_object(
+                self.mc,
+                self.tf_sess,
+                bucket_name,
+                key,
+                self.input_prefix,
+                self.output_prefix,
+                self.training_prefix
+            )
 
     def test_app_listener(self):
         q = Queue()
