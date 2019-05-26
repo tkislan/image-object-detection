@@ -130,7 +130,7 @@ class IntegrationTest(unittest.TestCase):
     def test_app_listener(self):
         q = Queue()
 
-        with AppThread(q, self.bucket_name, self.input_prefix, self.output_prefix):
+        with AppThread(q, self.bucket_name, self.input_prefix, self.output_prefix, self.training_prefix):
             time.sleep(5)  # Wait TF Session to load, and for connection to establish
 
             self.mc.fput_object(self.bucket_name, self.object_name, IMAGE_PATH, metadata=self.metadata)
@@ -141,12 +141,13 @@ class IntegrationTest(unittest.TestCase):
 
 
 class AppThread(threading.Thread):
-    def __init__(self, q: Queue, bucket_name: str, input_prefix: str, output_prefix: str):
+    def __init__(self, q: Queue, bucket_name: str, input_prefix: str, output_prefix: str, training_prefix: str):
         super().__init__()
         self.__q = q
         self.__bucket_name = bucket_name
         self.__input_prefix = input_prefix
         self.__output_prefix = output_prefix
+        self.__training_prefix = training_prefix
 
     def __enter__(self):
         self.start()
@@ -157,4 +158,10 @@ class AppThread(threading.Thread):
 
     def run(self):
         with MinioEventThread(self.__q, self.__bucket_name, self.__input_prefix):
-            detection_loop(self.__q, self.__bucket_name, self.__input_prefix, self.__output_prefix)
+            detection_loop(
+                self.__q,
+                self.__bucket_name,
+                self.__input_prefix,
+                self.__output_prefix,
+                self.__training_prefix
+            )
