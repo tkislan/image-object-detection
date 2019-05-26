@@ -45,10 +45,7 @@ def process_file_object(
             return
 
         print('Loading image into memory')
-        try:
-            raw_image_np = load_image(tmp_input_file_path)
-        finally:
-            os.remove(tmp_input_file_path)
+        raw_image_np = load_image(tmp_input_file_path)
 
         print('Detecting objects in file: {}'.format(tmp_input_file_path))
         image_np, classes = detect(tf_sess, raw_image_np)
@@ -83,6 +80,7 @@ def process_file_object(
                 metadata=metadata
             )
         finally:
+            os.remove(tmp_input_file_path)
             os.remove(tmp_output_file_path)
     finally:
         mc.remove_object(bucket_name, key)
