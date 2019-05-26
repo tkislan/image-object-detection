@@ -8,7 +8,7 @@ import tensorflow as tf
 from image_object_detection.detection.detection import detect
 from image_object_detection.detection.image import load_image, save_image
 from image_object_detection.detection.session import create_detection_session
-from image_object_detection.minio_utils.config import BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX
+from image_object_detection.minio_utils.config import BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX, TRAINING_PREFIX
 from image_object_detection.minio_utils.client import create_client
 from image_object_detection.minio_utils.events import MinioEventThread, iterate_objects
 from image_object_detection.utils.signal_listener import SignalListener
@@ -96,15 +96,16 @@ def safe_process_file_object(
     bucket_name: str,
     key: str,
     input_prefix: str,
-    output_prefix: str
+    output_prefix: str,
+    training_prefix: str
 ):
     try:
-        process_file_object(mc, tf_sess, bucket_name, key, input_prefix, output_prefix)
+        process_file_object(mc, tf_sess, bucket_name, key, input_prefix, output_prefix, training_prefix)
     except OSError as os_error:  # Ignore and log invalid images
         print(os_error)
 
 
-def detection_loop(q: Queue, bucket_name: str, input_prefix: str, output_prefix: str):
+def detection_loop(q: Queue, bucket_name: str, input_prefix: str, output_prefix: str, training_prefix: str):
     tf_sess = create_detection_session(DETECTION_MODEL_PATH)
     mc = create_client()
 
@@ -112,7 +113,15 @@ def detection_loop(q: Queue, bucket_name: str, input_prefix: str, output_prefix:
     for obj in objects:
         if obj.is_dir:
             continue
-        safe_process_file_object(mc, tf_sess, obj.bucket_name, obj.object_name, input_prefix, output_prefix)
+        safe_process_file_object(
+            mc,
+            tf_sess,
+            obj.bucket_name,
+            obj.object_name,
+            input_prefix,
+            output_prefix,
+            training_prefix
+        )
 
     while True:
         event = q.get()
@@ -120,7 +129,15 @@ def detection_loop(q: Queue, bucket_name: str, input_prefix: str, output_prefix:
             break
 
         for obj_bucket_name, obj_key in iterate_objects(event):
-            safe_process_file_object(mc, tf_sess, obj_bucket_name, obj_key, input_prefix, output_prefix)
+            safe_process_file_object(
+                mc,
+                tf_sess,
+                obj_bucket_name,
+                obj_key,
+                input_prefix,
+                output_prefix,
+                training_prefix
+            )
 
 
 def main():
@@ -129,7 +146,7 @@ def main():
     SignalListener(q)
 
     with MinioEventThread(q, BUCKET_NAME, INPUT_PREFIX):
-        detection_loop(q, BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX)
+        detection_loop(q, BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX, TRAINING_PREFIX)
 
 
 if __name__ == '__main__':
