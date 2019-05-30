@@ -151,7 +151,8 @@ def detection_loop(
                 obj_key,
                 input_prefix,
                 output_prefix,
-                training_prefix
+                training_prefix,
+                store_training_data
             )
 
 
