@@ -97,7 +97,8 @@ class IntegrationTest(unittest.TestCase):
             key,
             self.input_prefix,
             self.output_prefix,
-            self.training_prefix
+            self.training_prefix,
+            False
         )
 
         self.check_image_output()
@@ -124,13 +125,14 @@ class IntegrationTest(unittest.TestCase):
                 key,
                 self.input_prefix,
                 self.output_prefix,
-                self.training_prefix
+                self.training_prefix,
+                False
             )
 
     def test_app_listener(self):
         q = Queue()
 
-        with AppThread(q, self.bucket_name, self.input_prefix, self.output_prefix, self.training_prefix):
+        with AppThread(q, self.bucket_name, self.input_prefix, self.output_prefix, self.training_prefix, False):
             time.sleep(5)  # Wait TF Session to load, and for connection to establish
 
             self.mc.fput_object(self.bucket_name, self.object_name, IMAGE_PATH, metadata=self.metadata)
@@ -141,13 +143,22 @@ class IntegrationTest(unittest.TestCase):
 
 
 class AppThread(threading.Thread):
-    def __init__(self, q: Queue, bucket_name: str, input_prefix: str, output_prefix: str, training_prefix: str):
+    def __init__(
+        self,
+        q: Queue,
+        bucket_name: str,
+        input_prefix: str,
+        output_prefix: str,
+        training_prefix: str,
+        store_training_data: bool
+    ):
         super().__init__()
         self.__q = q
         self.__bucket_name = bucket_name
         self.__input_prefix = input_prefix
         self.__output_prefix = output_prefix
         self.__training_prefix = training_prefix
+        self.__store_training_data = store_training_data
 
     def __enter__(self):
         self.start()
@@ -163,5 +174,6 @@ class AppThread(threading.Thread):
                 self.__bucket_name,
                 self.__input_prefix,
                 self.__output_prefix,
-                self.__training_prefix
+                self.__training_prefix,
+                self.__store_training_data
             )
