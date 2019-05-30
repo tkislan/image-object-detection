@@ -2,7 +2,7 @@ version: '3'
 
 services:
   app:
-    image: tkislan/image-object-detection:ssdlite-mobilenet-coco-latest
+    image: ${IMAGE_NAME}
     stdin_open: true
     tty: true
     volumes:

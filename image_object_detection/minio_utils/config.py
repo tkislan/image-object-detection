@@ -8,6 +8,7 @@ BUCKET_NAME = os.environ.get('MINIO_BUCKET_NAME')
 INPUT_PREFIX = os.environ.get('MINIO_INPUT_PREFIX') or 'input/'
 OUTPUT_PREFIX = os.environ.get('MINIO_OUTPUT_PREFIX') or 'output/'
 TRAINING_PREFIX = os.environ.get('MINIO_TRAINING_PREFIX') or 'detected-training/'
+STORE_TRAINING_DATA = bool(int(os.environ.get('STORE_TRAINING_DATA', '0')))
 
 if not HOST:
     raise ValueError('MINIO_HOST environment variable missing')
