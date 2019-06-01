@@ -16,6 +16,10 @@ class DetectionTest(unittest.TestCase):
 
     def setUp(self):
         self.tf_sess = create_detection_session(DETECTION_MODEL_PATH)
+    
+    def tearDown(self):
+        self.tf_sess.close()
+        self.tf_sess = None
 
     def test_image_detection(self):
         image = load_image(IMAGE_PATH)
