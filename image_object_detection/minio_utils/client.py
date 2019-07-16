@@ -1,7 +1,7 @@
 from minio import Minio
 from minio.error import BucketAlreadyOwnedByYou, BucketAlreadyExists
 
-from .config import HOST, PORT, ACCESS_KEY, SECRET_KEY
+from .config import HOST, PORT, ACCESS_KEY, SECRET_KEY, SECURE
 
 
 def create_client() -> Minio:
@@ -9,7 +9,7 @@ def create_client() -> Minio:
         "{0}:{1}".format(HOST, PORT),
         access_key=ACCESS_KEY,
         secret_key=SECRET_KEY,
-        secure=False
+        secure=SECURE
     )
 
 

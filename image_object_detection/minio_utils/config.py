@@ -4,6 +4,7 @@ HOST = os.environ.get('MINIO_HOST')
 PORT = int(os.environ.get('MINIO_PORT') or 9000)
 ACCESS_KEY = os.environ.get('MINIO_ACCESS_KEY')
 SECRET_KEY = os.environ.get('MINIO_SECRET_KEY')
+SECURE = bool(int(os.environ.get('MINIO_SECURE', '0')))
 BUCKET_NAME = os.environ.get('MINIO_BUCKET_NAME')
 INPUT_PREFIX = os.environ.get('MINIO_INPUT_PREFIX') or 'input/'
 OUTPUT_PREFIX = os.environ.get('MINIO_OUTPUT_PREFIX') or 'output/'
