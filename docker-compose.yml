@@ -6,16 +6,15 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./image_object_detection:/opt/project/app/image_object_detection
-      - ./tests:/opt/project/app/tests
-      - ./models:/opt/models
+      - .:/opt/project/app
     environment:
       MINIO_HOST: minio
       MINIO_PORT: 9000
       MINIO_ACCESS_KEY: SO9KNO6YT9OGE39PQCZW
       MINIO_SECRET_KEY: EzH5iGs3qbJr1MwIMf2AUyfqzewgd2qgrk9+i+vU
       MINIO_BUCKET_NAME: imagedetection
-    working_dir: /opt/app
+    working_dir: /opt/project/app
+    command: sh
     depends_on:
       - minio
 

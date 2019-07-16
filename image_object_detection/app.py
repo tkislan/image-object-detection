@@ -79,9 +79,9 @@ def process_file_object(
                     metadata=metadata
                 )
         finally:
-            os.remove(tmp_input_file_path)
             os.remove(tmp_output_file_path)
     finally:
+        os.remove(tmp_input_file_path)
         mc.remove_object(bucket_name, key)
 
     print('Finished processing file')

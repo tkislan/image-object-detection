@@ -48,6 +48,7 @@ class IntegrationTest(unittest.TestCase):
 
     def tearDown(self):
         purge_bucket(self.mc, self.bucket_name)
+        self.tf_sess.close()
 
     def check_image_output(self):
         with TemporaryFileName() as tmpfile:
