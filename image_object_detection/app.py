@@ -31,8 +31,9 @@ def process_file_object(
 
     print('Processing file: {}'.format(key))
 
+    tmp_input_file_path = os.path.join('/tmp', file_name)
+
     try:
-        tmp_input_file_path = os.path.join('/tmp', file_name)
         tmp_output_file_path = os.path.join('/tmp', 'output_' + file_name)
 
         print('Downloading file: {}'.format(key))
