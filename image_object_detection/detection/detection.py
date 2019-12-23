@@ -7,9 +7,7 @@ from object_detection.utils import ops
 
 from image_object_detection.detection.category_index import category_index
 from image_object_detection.detection.visualizer import visualize
-
-DEFAULT_DETECTION_CLASSES = ["person"]
-DEFAULT_DETECTION_THRESHOLD = 0.5
+from image_object_detection.detection.config import DETECTION_CLASSES, DETECTION_THRESHOLD
 
 
 def run_inference(sess: tf.Session, image: np.array) -> dict:
@@ -79,11 +77,11 @@ def filter_classes(output_dict, classes: List[str], threshold):
 def detect_objects(
         sess: tf.Session,
         image: np.array,
-        threshold: float = DEFAULT_DETECTION_THRESHOLD
+        threshold: float = DETECTION_THRESHOLD
 ):
     output_dict = run_inference(sess, image)
 
-    return filter_classes(output_dict, DEFAULT_DETECTION_CLASSES, threshold)
+    return filter_classes(output_dict, DETECTION_CLASSES, threshold)
 
 
 def detect(tf_sess, image):
