@@ -1,9 +1,11 @@
 import collections
 import json
 import threading
+import time
 from queue import Queue
 from typing import Iterator
 from urllib.parse import unquote
+from urllib3.exceptions import HTTPError
 
 from image_object_detection.minio_utils.client import create_client
 
@@ -30,7 +32,13 @@ class MinioEventStreamIterator(collections.Iterable):
         while True:
             line = next(self.__stream)
             if line.strip():
-                event = json.loads(line.decode('utf-8'))
+                try:
+                    event = json.loads(line.decode("utf-8"))
+                except json.JSONDecodeError:
+                    # Stop iterating on invalid JSON
+                    # or when empty line is returned,
+                    # which indicates end of stream
+                    break
                 if event['Records'] is not None:
                     return event
 
@@ -64,8 +72,11 @@ class MinioEventThread(threading.Thread):
             try:
                 for event in self.__event_stream_it:
                     self.__q.put(event)
-            except json.JSONDecodeError:
-                response.close()
+            except HTTPError as error:
+                print("Failed to connect to Minio endpoint:", error)
+
+                # Wait before attempting to connect again.
+                time.sleep(1)
             except AttributeError:
                 break
 
