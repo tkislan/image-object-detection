@@ -25,7 +25,7 @@ jobs:
 
       - run:
           name: Build image
-          command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" --target base -t ${IMAGE_NAME} .
+          command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" --target amd -t ${IMAGE_NAME} .
 
       - run:
           name: Run flake8
