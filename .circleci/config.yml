@@ -4,7 +4,7 @@ jobs:
   build_and_test_image:
     # machine: true
     machine:
-      image: ubuntu-1604:202004-0
+      image: ubuntu-1604:202004-01
     environment:
       IMAGE_NAME: image-object-detection
     parameters:
