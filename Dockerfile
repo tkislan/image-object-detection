@@ -47,7 +47,7 @@ ENV PYTHONPATH=/opt/project/app:/opt/tensorflow_models/research:/opt/tensorflow_
 
 ADD image_object_detection /opt/project/app/image_object_detection
 
-COPY from=amd /opt/models /opt/models
+COPY --from=amd /opt/models /opt/models
 
 WORKDIR /opt/project/app
 
