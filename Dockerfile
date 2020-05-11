@@ -19,6 +19,8 @@ RUN mkdir -p /tmp/model/download && \
     mkdir -p /tmp/model/files && \
     tar -xzvf /tmp/model/download/*.tar.gz -C /tmp/model/files
 
+RUN apt-get install python3-opencv
+
 ADD image_object_detection /opt/project/app/image_object_detection
 
 RUN mkdir -p /opt/models/
@@ -41,6 +43,8 @@ RUN cd /opt/tensorflow_models/research && \
     git checkout v1.13.0 && \
     protoc object_detection/protos/*.proto --python_out=. && \
     python3 setup.py install
+
+RUN apt-get install python3-opencv
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/opt/project/app:/opt/tensorflow_models/research:/opt/tensorflow_models/research/slim
