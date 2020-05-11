@@ -14,7 +14,7 @@ from image_object_detection.minio_utils.client import create_client
 from image_object_detection.minio_utils.events import MinioEventThread, iterate_objects
 from image_object_detection.utils.signal_listener import SignalListener
 
-DETECTION_MODEL_PATH = '/opt/models/model.pb'
+DETECTION_MODEL_PATH = '/opt/models/graph.pb'
 
 
 def process_file_object(

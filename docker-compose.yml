@@ -1,8 +1,13 @@
-version: '3'
+version: '2.4'
 
 services:
   app:
-    image: ${IMAGE_NAME}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: amd
+      args:
+        MODEL_URL: 'http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz'
     stdin_open: true
     tty: true
     volumes:

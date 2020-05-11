@@ -2,7 +2,9 @@ version: 2.1
 
 jobs:
   build_and_test_image:
-    machine: true
+    # machine: true
+    machine:
+      image: ubuntu-1604:202004-0
     environment:
       IMAGE_NAME: image-object-detection
     parameters:
@@ -23,11 +25,11 @@ jobs:
 
       - run:
           name: Build image
-          command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" -t ${IMAGE_NAME} .
+          command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" --target base -t ${IMAGE_NAME} .
 
       - run:
           name: Run flake8
-          command: docker-compose -f docker-compose-test.yml run --rm app /bin/bash -c "pip install flake8 && flake8 image_object_detection tests"
+          command: docker-compose -f docker-compose-test.yml run --rm app /bin/bash -c "pip3 install flake8 && flake8 image_object_detection tests"
 
       - run:
           name: Run tests
@@ -41,6 +43,18 @@ jobs:
           name: Push image
           command: docker push tkislan/image-object-detection:<< parameters.docker_tag >>
 
+      - run:
+          name: Setup Qemu
+          command: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      
+      - run:
+          name: Build Jetson image
+          command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" -t tkislan/image-object-detection:jetson-<< parameters.docker_tag >> .
+      
+      - run:
+          name: Push image
+          command: docker push tkislan/image-object-detection:jetson-<< parameters.docker_tag >>
+
 workflows:
   version: 2
   build:
@@ -49,19 +63,19 @@ workflows:
           name: Model ssdlite-mobilenet-v2-coco
           model_url: 'http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz'
           docker_tag: 'ssdlite-mobilenet-coco-latest'
-      - build_and_test_image:
-          name: Model ssd-mobilenet-v1-coco
-          model_url: 'http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz'
-          docker_tag: 'ssd-mobilenet-coco-latest'
-      - build_and_test_image:
-          name: Model faster-rcnn-inception-v2-coco
-          model_url: 'http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz'
-          docker_tag: 'faster-rcnn-inception-coco-latest'
-      - build_and_test_image:
-          name: Model ssd-resnet50-v1-coco
-          model_url: 'http://download.tensorflow.org/models/object_detection/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz'
-          docker_tag: 'ssd-resnet50-coco-latest'
-      - build_and_test_image:
-          name: Model faster-rcnn-resnet101-kitti
-          model_url: 'http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet101_kitti_2018_01_28.tar.gz'
-          docker_tag: 'faster-rcnn-resnet101-kitti-latest'
+      # - build_and_test_image:
+      #     name: Model ssd-mobilenet-v1-coco
+      #     model_url: 'http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz'
+      #     docker_tag: 'ssd-mobilenet-coco-latest'
+      # - build_and_test_image:
+      #     name: Model faster-rcnn-inception-v2-coco
+      #     model_url: 'http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz'
+      #     docker_tag: 'faster-rcnn-inception-coco-latest'
+      # - build_and_test_image:
+      #     name: Model ssd-resnet50-v1-coco
+      #     model_url: 'http://download.tensorflow.org/models/object_detection/ssd_resnet50_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz'
+      #     docker_tag: 'ssd-resnet50-coco-latest'
+      # - build_and_test_image:
+      #     name: Model faster-rcnn-resnet101-kitti
+      #     model_url: 'http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet101_kitti_2018_01_28.tar.gz'
+      #     docker_tag: 'faster-rcnn-resnet101-kitti-latest'
