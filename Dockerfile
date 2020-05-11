@@ -19,7 +19,7 @@ RUN mkdir -p /tmp/model/download && \
     mkdir -p /tmp/model/files && \
     tar -xzvf /tmp/model/download/*.tar.gz -C /tmp/model/files
 
-RUN apt-get install -y python3-opencv
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3-opencv
 
 ADD image_object_detection /opt/project/app/image_object_detection
 
@@ -44,7 +44,7 @@ RUN cd /opt/tensorflow_models/research && \
     protoc object_detection/protos/*.proto --python_out=. && \
     python3 setup.py install
 
-RUN apt-get install -y python3-opencv
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3-opencv
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/opt/project/app:/opt/tensorflow_models/research:/opt/tensorflow_models/research/slim
