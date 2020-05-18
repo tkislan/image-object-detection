@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/opt/project/app:/opt/tensorflow_models/research:/opt/tensorflow_models/research/slim
 
 RUN apt-get update && apt-get install -y curl git protobuf-compiler libfreetype6-dev
-RUN pip3 install Matplotlib==3.2.1 Pillow==7.1.2 minio==5.0.10
+RUN pip3 install Matplotlib==3.2.1 Pillow==7.1.2 minio==5.0.10 paho-mqtt==1.5.0
 RUN git clone https://github.com/tensorflow/models /opt/tensorflow_models
 RUN cd /opt/tensorflow_models/research && \
     git checkout v1.13.0 && \
@@ -19,7 +19,9 @@ RUN mkdir -p /tmp/model/download && \
     mkdir -p /tmp/model/files && \
     tar -xzvf /tmp/model/download/*.tar.gz -C /tmp/model/files
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3-opencv
+ENV TZ=Europe/Bratislava
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3-opencv
 
 ADD image_object_detection /opt/project/app/image_object_detection
 
@@ -37,14 +39,16 @@ WORKDIR /opt/project/app
 FROM nvcr.io/nvidia/l4t-tensorflow:r32.4.2-tf1.15-py3
 
 RUN apt-get update && apt-get install -y git protobuf-compiler libfreetype6-dev
-RUN pip3 install Matplotlib==3.2.1 Pillow==7.1.2 minio==5.0.10
+RUN pip3 install Matplotlib==3.2.1 Pillow==7.1.2 minio==5.0.10 paho-mqtt==1.5.0
 RUN git clone https://github.com/tensorflow/models /opt/tensorflow_models
 RUN cd /opt/tensorflow_models/research && \
     git checkout v1.13.0 && \
     protoc object_detection/protos/*.proto --python_out=. && \
     python3 setup.py install
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3-opencv
+ENV TZ=Europe/Bratislava
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3-opencv
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/opt/project/app:/opt/tensorflow_models/research:/opt/tensorflow_models/research/slim
