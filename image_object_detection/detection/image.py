@@ -5,6 +5,7 @@ from PIL import Image
 def load_image(file_path: str) -> np.array:
     print('Opening image')
     image = Image.open(file_path)
+    image = image.convert('RGB')
 
     print('Converting image to array')
     # the array based representation of the image will be used later in order to prepare the
