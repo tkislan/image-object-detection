@@ -2,7 +2,6 @@
 import numpy as np
 
 import tensorrt as trt
-from image_object_detection.utils.common import HostDeviceMem
 from image_object_detection.utils.model_data import ModelData
 
 
@@ -25,6 +24,7 @@ def allocate_buffers(engine):
         stream (cuda.Stream): cuda stream for engine inference synchronization
     """
     import pycuda.driver as cuda
+    from image_object_detection.utils.common import HostDeviceMem
 
     inputs = []
     outputs = []
