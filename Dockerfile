@@ -17,7 +17,7 @@ RUN pip3 install minio==5.0.10 paho-mqtt==1.5.0
 RUN mkdir -p /tmp/model/download && \
     cd /tmp/model/download && \
     echo "Downloading model: ${MODEL_URL}" && \
-    curl -L -O "${MODEL_URL}" && \
+    curl -L -O --retry 5 "${MODEL_URL}" && \
     mkdir -p /tmp/model/files && \
     tar -xzvf /tmp/model/download/*.tar.gz -C /tmp/model/files
 
