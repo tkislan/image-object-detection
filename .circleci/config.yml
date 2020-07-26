@@ -22,6 +22,10 @@ jobs:
       - run:
           name: Docker login
           command: docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PASS}
+      
+      - run:
+          name: Pull image
+          command: docker pull tkislan/image-object-detection:<< parameters.docker_tag >> || true
 
       - run:
           name: Build image
@@ -52,6 +56,10 @@ jobs:
           command: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       
       - run:
+          name: Pull Jetson image
+          command: docker pull tkislan/image-object-detection:jetson-<< parameters.docker_tag >> || true
+      
+      - run:
           name: Build Jetson image
           command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" -t tkislan/image-object-detection:jetson-<< parameters.docker_tag >> .
       
@@ -60,7 +68,7 @@ jobs:
           command: docker images
       
       - run:
-          name: Push image
+          name: Push Jetson image
           command: docker push tkislan/image-object-detection:jetson-<< parameters.docker_tag >>
 
 workflows:
