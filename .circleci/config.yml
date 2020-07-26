@@ -27,13 +27,13 @@ jobs:
           name: Build image
           command: docker build --build-arg MODEL_URL="<< parameters.model_url >>" --target amd -t ${IMAGE_NAME} .
 
-      - run:
-          name: Run flake8
-          command: docker-compose -f docker-compose-test.yml run --rm app /bin/bash -c "pip3 install flake8 && flake8 image_object_detection tests"
+      # - run:
+      #     name: Run flake8
+      #     command: docker-compose -f docker-compose-test.yml run --rm app /bin/bash -c "pip3 install flake8 && flake8 image_object_detection tests"
 
-      - run:
-          name: Run tests
-          command: docker-compose -f docker-compose-test.yml run --rm app python -m unittest discover tests *_test.py
+      # - run:
+      #     name: Run tests
+      #     command: docker-compose -f docker-compose-test.yml run --rm app python -m unittest discover tests *_test.py
 
       - run:
           name: Tag image
