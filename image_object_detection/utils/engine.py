@@ -1,7 +1,6 @@
 # Utility functions for building/saving/loading TensorRT Engine
 import numpy as np
 
-import pycuda.driver as cuda
 import tensorrt as trt
 from image_object_detection.utils.common import HostDeviceMem
 from image_object_detection.utils.model_data import ModelData
@@ -25,6 +24,8 @@ def allocate_buffers(engine):
         bindings [int]: buffer to device bindings
         stream (cuda.Stream): cuda stream for engine inference synchronization
     """
+    import pycuda.driver as cuda
+
     inputs = []
     outputs = []
     bindings = []
