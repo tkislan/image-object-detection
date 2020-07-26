@@ -33,3 +33,10 @@ services:
       MINIO_SECRET_KEY: EzH5iGs3qbJr1MwIMf2AUyfqzewgd2qgrk9+i+vU
     ports:
       - 19000:9000
+
+  mosquitto:
+    image: eclipse-mosquitto:1.6.8
+    volumes:
+      - ./__docker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    ports:
+      - 19001:1883

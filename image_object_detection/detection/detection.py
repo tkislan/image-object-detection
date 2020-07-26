@@ -6,8 +6,9 @@ import tensorflow as tf
 from object_detection.utils import ops
 
 from image_object_detection.detection.category_index import category_index
-from image_object_detection.detection.visualizer import visualize
+# from image_object_detection.detection.visualizer import visualize
 from image_object_detection.detection.config import DETECTION_CLASSES, DETECTION_THRESHOLD
+from image_object_detection.detection.detection_result import DetectionResult
 
 
 def run_inference(sess: tf.Session, image: np.array) -> dict:
@@ -19,20 +20,6 @@ def run_inference(sess: tf.Session, image: np.array) -> dict:
         tensor_name = key + ':0'
         if tensor_name in all_tensor_names:
             tensor_dict[key] = sess.graph.get_tensor_by_name(tensor_name)
-    if 'detection_masks' in tensor_dict:
-        # The following processing is only for single image
-        detection_boxes = tf.squeeze(tensor_dict['detection_boxes'], [0])
-        detection_masks = tf.squeeze(tensor_dict['detection_masks'], [0])
-        # Reframe is required to translate mask from box coordinates to image coordinates and fit the image size.
-        real_num_detection = tf.cast(tensor_dict['num_detections'][0], tf.int32)
-        detection_boxes = tf.slice(detection_boxes, [0, 0], [real_num_detection, -1])
-        detection_masks = tf.slice(detection_masks, [0, 0, 0], [real_num_detection, -1, -1])
-        detection_masks_reframed = ops.reframe_box_masks_to_image_masks(
-            detection_masks, detection_boxes, image.shape[0], image.shape[1]
-        )
-        detection_masks_reframed = tf.cast(tf.greater(detection_masks_reframed, 0.5), tf.uint8)
-        # Follow the convention by adding back the batch dimension
-        tensor_dict['detection_masks'] = tf.expand_dims(detection_masks_reframed, 0)
     image_tensor = sess.graph.get_tensor_by_name('image_tensor:0')
 
     # Run inference
@@ -49,8 +36,8 @@ def run_inference(sess: tf.Session, image: np.array) -> dict:
     return output_dict
 
 
-def get_class_name(cls):
-    return category_index()[cls]['name']
+def get_class_name(class_id):
+    return category_index()[class_id]['name']
 
 
 def filter_classes(output_dict, classes: List[str], threshold):
@@ -63,8 +50,8 @@ def filter_classes(output_dict, classes: List[str], threshold):
     )
 
     detection_values = [
-        (box, cls, score) for (box, cls, score) in detection_values
-        if score >= threshold and get_class_name(cls) in classes
+        (box, class_id, score) for (box, class_id, score) in detection_values
+        if score >= threshold and get_class_name(class_id) in classes
     ]
 
     if len(detection_values) == 0:
@@ -86,8 +73,8 @@ def detect_objects(
 
 def detect(tf_sess, image):
     boxes, classes, scores = detect_objects(tf_sess, image)
-    visualize(image, boxes, classes, scores)
+    # visualize(image, boxes, classes, scores)
 
-    unique_classes = list(set([get_class_name(cls) for cls in classes]))
+    unique_classes = list(set([get_class_name(class_id) for class_id in classes]))
 
     return image, unique_classes

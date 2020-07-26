@@ -1,6 +1,7 @@
 version: '2.4'
 services:
   app:
+    network_mode: host
     environment:
       HISTFILE: '/root/.bashhistory/.bash_history'
     volumes:

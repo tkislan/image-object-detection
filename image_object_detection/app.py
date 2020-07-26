@@ -1,170 +1,84 @@
 import os
-from queue import Queue
+import queue
+import time
+from typing import List
 
-from minio import Minio
-from minio.error import NoSuchKey
-import tensorflow as tf
+from image_object_detection.camera.image import CameraImageContainer
+from image_object_detection.detection.config import TENSORRT
+from image_object_detection.detection.detection_result import DetectionResult
+from image_object_detection.utils.base_inference import BaseInferenceWrapper
+from image_object_detection.workers.base import BaseWorker
+from image_object_detection.workers.camera import CameraFeedWorker
+from image_object_detection.workers.detection import DetectionWorker
+from image_object_detection.workers.visualizer import VisualizerWorker
 
-from image_object_detection.detection.detection import detect
-from image_object_detection.detection.image import load_image, save_image
-from image_object_detection.detection.session import create_detection_session
-from image_object_detection.minio_utils.config import BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX, TRAINING_PREFIX, \
-    STORE_TRAINING_DATA
-from image_object_detection.minio_utils.client import create_client
-from image_object_detection.minio_utils.events import MinioEventThread, iterate_objects
-from image_object_detection.utils.signal_listener import SignalListener
+# Model used for inference
+WORKSPACE_DIR = '/workspace'
+CAMERA_URLS = os.environ.get('CAMERA_URLS', 'rtsp://admin:Hikvision@localhost:5554/ch1/main/av_stream').split(',')
 
-DETECTION_MODEL_PATH = '/opt/models/graph.pb'
+# Layout of TensorRT network output metadata
+TRT_PREDICTION_LAYOUT = {
+    "image_id": 0,
+    "label": 1,
+    "confidence": 2,
+    "xmin": 3,
+    "ymin": 4,
+    "xmax": 5,
+    "ymax": 6
+}
 
+def get_inference_wrapper() -> BaseInferenceWrapper:
+    if TENSORRT == True:
+        import image_object_detection.utils.trt_inference as trt_inference_utils # TRT inference wrappers
 
-def process_file_object(
-    mc: Minio,
-    tf_sess: tf.Session,
-    bucket_name: str,
-    key: str,
-    input_prefix: str,
-    output_prefix: str,
-    training_prefix: str,
-    store_training_data: bool
-):
-    file_name = os.path.basename(key)
-
-    print('Processing file: {}'.format(key))
-
-    tmp_input_file_path = os.path.join('/tmp', file_name)
-
-    try:
-        tmp_output_file_path = os.path.join('/tmp', 'output_' + file_name)
-
-        print('Downloading file: {}'.format(key))
-        try:
-            ret = mc.fget_object(bucket_name, key, tmp_input_file_path)
-        except NoSuchKey:
-            print('File not found, ignoring')
-            return
-
-        print('Loading image into memory')
-        raw_image_np = load_image(tmp_input_file_path)
-
-        print('Detecting objects in file: {}'.format(tmp_input_file_path))
-        image_np, classes = detect(tf_sess, raw_image_np)
-        print('Detected classes: {}'.format(','.join(classes)))
-
-        if not classes:
-            return
-
-        metadata = {
-            **(ret.metadata or {}),
-            "x-amz-meta-classes": ','.join(classes),
-        }
-
-        try:
-            save_image(image_np, tmp_output_file_path)
-
-            output_key = key.replace(input_prefix, output_prefix, 1)
-            print('Uploading file to: {}'.format(output_key))
-            mc.fput_object(
-                bucket_name,
-                output_key,
-                tmp_output_file_path,
-                metadata=metadata
-            )
-
-            if store_training_data:
-                training_output_key = key.replace(input_prefix, training_prefix, 1)
-                print('Uploading training file to: {}'.format(training_output_key))
-                mc.fput_object(
-                    bucket_name,
-                    training_output_key,
-                    tmp_input_file_path,
-                    metadata=metadata
-                )
-        finally:
-            os.remove(tmp_output_file_path)
-    finally:
-        os.remove(tmp_input_file_path)
-        mc.remove_object(bucket_name, key)
-
-    print('Finished processing file')
-
-
-def safe_process_file_object(
-    mc: Minio,
-    tf_sess: tf.Session,
-    bucket_name: str,
-    key: str,
-    input_prefix: str,
-    output_prefix: str,
-    training_prefix: str,
-    store_training_data: bool
-):
-    try:
-        process_file_object(
-            mc,
-            tf_sess,
-            bucket_name,
-            key,
-            input_prefix,
-            output_prefix,
-            training_prefix,
-            store_training_data
-        )
-    except OSError as os_error:  # Ignore and log invalid images
-        print(os_error)
-
-
-def detection_loop(
-    q: Queue,
-    bucket_name: str,
-    input_prefix: str,
-    output_prefix: str,
-    training_prefix: str,
-    store_training_data: bool
-):
-    tf_sess = create_detection_session(DETECTION_MODEL_PATH)
-    mc = create_client()
-
-    objects = mc.list_objects_v2(bucket_name, prefix=input_prefix, recursive=True)
-    for obj in objects:
-        if obj.is_dir:
-            continue
-        safe_process_file_object(
-            mc,
-            tf_sess,
-            obj.bucket_name,
-            obj.object_name,
-            input_prefix,
-            output_prefix,
-            training_prefix,
-            store_training_data
-        )
-
-    while True:
-        event = q.get()
-        if event is None:
-            break
-
-        for obj_bucket_name, obj_key in iterate_objects(event):
-            safe_process_file_object(
-                mc,
-                tf_sess,
-                obj_bucket_name,
-                obj_key,
-                input_prefix,
-                output_prefix,
-                training_prefix,
-                store_training_data
-            )
-
+        return trt_inference_utils.TRTInference('/opt/models/engine.bin')
+    else:
+        import image_object_detection.utils.inference as inference_utils # TF inference wrappers
+        return inference_utils.TensorflowInference('/opt/models/graph.pb')
 
 def main():
-    q = Queue()
+    print('initializing session')
+    inference_wrapper = get_inference_wrapper()
+    print('initialization done')
 
-    SignalListener(q)
+    QUEUE_MAXSIZE_PER_CAMERA = 5
+    camera_urls = ['rtsp://admin:Hikvision@localhost:5554/ch1/main/av_stream']
+    # camera_urls = [
+    #     'rtsp://admin:Hikvision@192.168.1.200:554/ch1/main/av_stream',
+    #     'rtsp://admin:Hikvision@192.168.1.201:554/ch1/main/av_stream',
+    # ]
 
-    with MinioEventThread(q, BUCKET_NAME, INPUT_PREFIX):
-        detection_loop(q, BUCKET_NAME, INPUT_PREFIX, OUTPUT_PREFIX, TRAINING_PREFIX, STORE_TRAINING_DATA)
+    image_queue: 'queue.Queue[CameraImageContainer]' = queue.Queue(maxsize=QUEUE_MAXSIZE_PER_CAMERA * len(camera_urls))
+    result_queue: 'queue.Queue[DetectionResult]' = queue.Queue()
+
+    workers: List[BaseWorker] = [
+        *[CameraFeedWorker(camera_url, image_queue) for camera_url in camera_urls], 
+        VisualizerWorker(result_queue), 
+        DetectionWorker(inference_wrapper, image_queue, result_queue),
+    ]
+
+    for worker in workers:
+        worker.start()
+        if isinstance(worker, CameraFeedWorker):
+            worker.enable_read()
+    
+    print('starting wait')
+    time.sleep(3)
+
+    try:
+        time.sleep(30)
+    except KeyboardInterrupt:
+        pass
+    except Exception as error:
+        print(error)
+    print('Run time elapsed')
+
+    for worker in workers:
+        worker.stop()
+    
+    for worker in workers:
+        worker.join()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

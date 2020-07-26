@@ -17,7 +17,5 @@ def make_bucket_if_not_exists(mc: Minio, bucket_name: str):
     # Make a bucket with the make_bucket API call.
     try:
         mc.make_bucket(bucket_name)
-    except BucketAlreadyOwnedByYou:
-        pass
-    except BucketAlreadyExists:
+    except (BucketAlreadyOwnedByYou, BucketAlreadyExists):
         pass

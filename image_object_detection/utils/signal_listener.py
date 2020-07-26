@@ -1,12 +1,12 @@
 import signal
-from queue import Queue
+import threading
 
 
 class SignalListener:
-    def __init__(self, q: Queue):
-        self.__q = q
-        signal.signal(signal.SIGINT, self.__signal_handler)
-        signal.signal(signal.SIGTERM, self.__signal_handler)
+    def __init__(self, event: threading.Event):
+        self._event = event
+        signal.signal(signal.SIGINT, self._signal_handler)
+        signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def __signal_handler(self, _, __):
-        self.__q.put(None)
+    def _signal_handler(self, _, __):
+        self._event.set()
