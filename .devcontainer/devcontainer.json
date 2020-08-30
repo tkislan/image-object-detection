@@ -15,10 +15,12 @@
 
 	// Uncomment the next line to run commands after the container is created - for example installing git.
 	"postCreateCommand": "history -a; apt-get update; apt-get install -y git",
+	"postAttachCommand": "pip3 install mypy pytest",
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.
 	"extensions": [
 		"ms-python.python",
+		"ms-python.vscode-pylance",
 		"visualstudioexptteam.vscodeintellicode",
 		"eamodio.gitlens",
 		"github.vscode-pull-request-github"

@@ -11,11 +11,16 @@ from image_object_detection.workers.base import BaseWorker
 
 
 class CameraFeedWorker(BaseWorker):
-    def __init__(self, url: str, image_queue: 'queue.Queue[CameraImageContainer]'):
+    def __init__(self, name: str, url: str, image_queue: 'queue.Queue[CameraImageContainer]'):
         super().__init__()
+        self._name = name
         self._url = url
         self._image_queue = image_queue
         self._should_read = threading.Event()
+    
+    def start(self):
+        self.enable_read()
+        super().start()
     
     def run_processing(self):
         cap: Optional[cv2.VideoCapture] = None
@@ -25,28 +30,37 @@ class CameraFeedWorker(BaseWorker):
                 return
 
             cap = cv2.VideoCapture(self._url)
+            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
             time.sleep(1)
 
             while self._should_read.is_set():
-                ret, raw_image_np = cap.read()
+                ret = cap.grab()
 
                 if ret is not True:
-                    print('Failed to read image from camera')
+                    print('Failed to grab image from camera')
+                    time.sleep(5)
+                    break
+
+                if not self._image_queue.empty():
+                    continue
+
+                ret, raw_image_np = cap.retrieve()
+                if ret is not True:
+                    print('Failed to retrieve image from camera')
                     time.sleep(5)
                     break
             
                 raw_image_np = raw_image_np[...,::-1] #  Convert from BGR to RGB
                 raw_image_np = raw_image_np.astype(np.uint8)
 
-                image_container = CameraImageContainer.create(raw_image_np, get_split_image_dimensions(raw_image_np))
+                image_container = CameraImageContainer.create(self._name, raw_image_np, get_split_image_dimensions(raw_image_np))
 
                 print('Putting image into queue')
                 try:
-                    self._image_queue.put(image_container, block=True, timeout=1)
-                    print('Image put into queue')
+                    self._image_queue.put_nowait(image_container)
                 except queue.Full:
-                    print('Queue full')
+                    pass
         except Exception as error:
             print('Camera feed failed')
             print(error)

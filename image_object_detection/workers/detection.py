@@ -1,4 +1,5 @@
 import queue
+from typing import List
 
 from image_object_detection.camera.image import CameraImageContainer
 from image_object_detection.detection.detection_result import DetectionResult
@@ -27,10 +28,19 @@ class DetectionWorker(BaseWorker):
             detection_result, detailed_image_containers = run_inference_container(self._inference_wrapper, image_container)
             if detection_result is not None:
                 self._result_queue.put(detection_result)
+                return
 
+            detailed_detection_results: List[DetectionResult] = []
             for detailed_image_container in detailed_image_containers:
                 print('running detailed inference')
                 detection_result, _ = run_inference_container(self._inference_wrapper, detailed_image_container)
-                self._result_queue.put(detection_result)
+                if detection_result is not None:
+                    detailed_detection_results.append(detection_result)
+            
+            if len(detailed_detection_results) > 0:
+                for detailed_detection_result in detailed_detection_results:
+                    self._result_queue.put(detailed_detection_result)
+            else:
+                self._result_queue.put(DetectionResult.empty(image_container))
         except queue.Empty:
             pass

@@ -1,19 +1,28 @@
-from image_object_detection.utils.coco import COCO_CLASSES_LIST
-from image_object_detection.utils.detection_output import DetectionOutput
-from image_object_detection.utils.base_inference import BaseInferenceWrapper
+import os
 import time
 from typing import List
 
 import numpy as np
-import tensorrt as trt
 
 import image_object_detection.utils.common as common
 import image_object_detection.utils.engine as engine_utils  # TRT Engine creation/save/load utils
-from image_object_detection.utils.model_data import ModelData
+import tensorrt as trt
 from image_object_detection.utils.base_inference import BaseInferenceWrapper
+from image_object_detection.utils.coco import COCO_CLASSES_LIST
+from image_object_detection.utils.detection_output import DetectionOutput
+from image_object_detection.utils.model_data import ModelData
+from image_object_detection.utils.trt_model import model_to_uff
+
+TRT_PRECISION = int(os.environ.get('TRT_PRECISION', 32))
+BATCH_SIZE = int(os.environ.get('BATCH_SIZE', 4))
 
 # TensorRT logger singleton
 TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
+
+TRT_PRECISION_TO_DATATYPE = {
+    16: trt.DataType.HALF,
+    32: trt.DataType.FLOAT
+}
 
 TRT_PREDICTION_LAYOUT = {
     "image_id": 0,
@@ -60,11 +69,11 @@ def analyze_tensorrt_prediction(detection_out, pred_start_idx):
 
 class TRTInference(BaseInferenceWrapper):
     """Manages TensorRT objects for model inference."""
-    def __init__(self, trt_engine_path):
+    def __init__(self, model_path: str):
         """Initializes TensorRT objects needed for model inference.
 
         Args:
-            trt_engine_path (str): path where TensorRT engine should be stored
+            model_path (str): path where TF graph is stored
         """
 
         # We first load all custom plugins shipped with TensorRT,
@@ -76,8 +85,24 @@ class TRTInference(BaseInferenceWrapper):
         # TRT engine placeholder
         self.trt_engine = None
 
-        print("Loading cached TensorRT engine from {}".format(trt_engine_path))
-        self.trt_engine = engine_utils.load_engine(self.trt_runtime, trt_engine_path)
+        trt_engine_path = os.path.join(os.path.dirname(model_path), f'engine_{TRT_PRECISION}_{BATCH_SIZE}.bin')
+
+        if not os.path.exists(trt_engine_path):
+            uff_model_path = os.path.join(os.path.dirname(model_path), 'graph.uff')
+
+            model_to_uff(model_path, uff_model_path)
+
+            self.trt_engine = engine_utils.build_engine(
+                uff_model_path, 
+                TRT_LOGGER,
+                trt_engine_datatype=TRT_PRECISION_TO_DATATYPE[TRT_PRECISION],
+                batch_size=BATCH_SIZE
+            )
+            # Save the engine to file
+            engine_utils.save_engine(self.trt_engine, trt_engine_path)
+        else:
+            print("Loading cached TensorRT engine from {}".format(trt_engine_path))
+            self.trt_engine = engine_utils.load_engine(self.trt_runtime, trt_engine_path)
 
         # This allocates memory for network inputs/outputs on both CPU and GPU
         self.inputs, self.outputs, self.bindings, self.stream = engine_utils.allocate_buffers(self.trt_engine)
@@ -114,7 +139,8 @@ class TRTInference(BaseInferenceWrapper):
         # And return results
         return detection_out, keep_count_out
 
-    def infer_batch(self, imgs_np: List[np.ndarray]):
+    def infer_batch(self, imgs: List[np.ndarray]):
+        imgs_np = np.array(imgs)
         # Verify if the supplied batch size is not too big
         max_batch_size = self.trt_engine.max_batch_size
         actual_batch_size = len(imgs_np)

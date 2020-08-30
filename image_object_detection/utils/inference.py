@@ -39,8 +39,7 @@ class TensorflowInference(BaseInferenceWrapper):
         ]:
             tensor_name = key + ':0'
             if tensor_name in all_tensor_names:
-                tensor_dict[key] = self.detection_graph.get_tensor_by_name(
-                    tensor_name)
+                tensor_dict[key] = self.detection_graph.get_tensor_by_name(tensor_name)
 
         image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
         output_dict = self.sess.run(tensor_dict, feed_dict={image_tensor: image_input})

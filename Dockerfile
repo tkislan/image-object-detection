@@ -62,11 +62,11 @@ ADD image_object_detection /opt/project/app/image_object_detection
 
 COPY --from=amd /opt/models /opt/models
 
-RUN python3 /opt/project/app/image_object_detection/trt_model_convert.py \
-        /opt/models/graph.pb \
-        ${TRT_ENGINE_PATH} \
-        ${TRT_PRECISION} \
-        ${BATCH_SIZE}
+# RUN python3 /opt/project/app/image_object_detection/trt_model_convert.py \
+#         /opt/models/graph.pb \
+#         ${TRT_ENGINE_PATH} \
+#         ${TRT_PRECISION} \
+#         ${BATCH_SIZE}
 
 WORKDIR /opt/project/app
 

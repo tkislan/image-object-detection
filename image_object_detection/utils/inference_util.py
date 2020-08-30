@@ -6,7 +6,8 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-from image_object_detection.camera.image import (CameraImageContainer)
+from image_object_detection.camera.image import CameraImageContainer
+from image_object_detection.config.detection import DETECTION_THRESHOLD, LOW_DETECTION_THRESHOLD
 from image_object_detection.detection.boxes import adjust_detection_box
 from image_object_detection.detection.detection_result import DetectionResult
 from image_object_detection.utils.base_inference import BaseInferenceWrapper
@@ -26,13 +27,19 @@ def run_inference_container(
     status = analyze_detection(detection_result)
 
     if status == DetectionStatus.YES:
-        cut_off_threshold(detection_result, 0.80)
+        cut_off_threshold(detection_result, DETECTION_THRESHOLD)
         return detection_result, []
     elif status == DetectionStatus.MAYBE and not image_container.detailed:
         dimensions_per_size = get_split_detail_image_dimensions(detection_result)
 
         return None, [
-            CameraImageContainer.create(image_container.raw_image_np, dimensions, detailed=True)
+            CameraImageContainer.create(
+                image_container.camera_name,
+                image_container.raw_image_np,
+                dimensions,
+                detailed=True,
+                created_at=image_container.created_at
+            )
             for dimensions in dimensions_per_size.values()
         ]
     else:
@@ -48,9 +55,9 @@ class DetectionStatus(int, enum.Enum):
 def analyze_detection(result: DetectionResult) -> DetectionStatus:
     maybe = False
     for r in chain(*result.image_results):
-        if r.confidence > 0.7:
+        if r.confidence > DETECTION_THRESHOLD:
             return DetectionStatus.YES
-        elif r.confidence > 0.15:
+        elif r.confidence > LOW_DETECTION_THRESHOLD:
             maybe = True
     
     return DetectionStatus.MAYBE if maybe else DetectionStatus.NO
@@ -83,11 +90,11 @@ def get_image_dimensions_from_box(raw_height: int, raw_width: int, box: np.ndarr
     if size > size_limit:
         return None
     elif size > size_limit * 2/3:
-        size = size_limit
+        size = max(size_limit, 300)
     elif size > size_limit * 1/3:
-        size = int(size_limit * 2/3)
+        size = max(int(size_limit * 2/3), 300)
     else:
-        size = int(size_limit * 1/3)
+        size = max(int(size_limit * 1/3), 300)
     top = max(int(box[0] - (size - height) / 2), 0)
     left = max(int(box[1] - (size - width) / 2), 0)
     return (size, ((top, top + size), (left, left + size)))

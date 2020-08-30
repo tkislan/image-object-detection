@@ -1,10 +1,11 @@
-from image_object_detection.utils.model_data import ModelData
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import cv2
 import numpy as np
 
 from image_object_detection.detection.config import TENSORRT
+from image_object_detection.utils.model_data import ModelData
+from image_object_detection.utils.timing import get_current_time_millis
 
 
 def split_image_into_squares(image: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -34,23 +35,33 @@ def transform_image(image: np.ndarray) -> np.ndarray:
 class CameraImageContainer:
     def __init__(
         self,
+        camera_name: str,
         raw_image_np: np.ndarray,
         dimensions: List[Tuple[Tuple[int, int], Tuple[int, int]]],
         cropped_images: List[np.ndarray],
-        detailed: bool
+        detailed: bool,
+        created_at: int
     ):
+        self.camera_name = camera_name
         self.raw_image_np = raw_image_np
         self.dimensions = dimensions
         self.cropped_images = cropped_images
         self.detailed = detailed
+        # self.created_at = time.perf_counter() * 1000
+        self.created_at = created_at
     
     @classmethod
     def create(
         cls,
+        camera_name: str,
         raw_image_np: np.ndarray,
         dimensions: List[Tuple[Tuple[int, int], Tuple[int, int]]],
-        detailed: bool = False
+        detailed: bool = False,
+        created_at: Optional[int] = None
     ) -> 'CameraImageContainer':
+        if created_at is None:
+            created_at = get_current_time_millis()
+
         cropped_images = [
             raw_image_np[
                 crop_image_dimensions[0][0]:crop_image_dimensions[0][1],
@@ -63,4 +74,4 @@ class CameraImageContainer:
             cropped_images = [
                 transform_image(image) for image in cropped_images
             ]
-        return cls(raw_image_np, dimensions, cropped_images, detailed)
+        return cls(camera_name, raw_image_np, dimensions, cropped_images, detailed, created_at)

@@ -4,3 +4,5 @@ __playground
 playground*
 /models
 /tests
+*.mp4
+.git

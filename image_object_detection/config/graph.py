@@ -1,0 +1,1 @@
+GRAPH_PATH = '/opt/models/graph.pb'

@@ -43,7 +43,7 @@ class CameraFeed(threading.Thread):
                         self._image_queue.put(image_container, block=True, timeout=1)
                         print('Image put into queue')
                     except queue.Full:
-                        print('Queue full')
+                        print('Image Queue full')
             except Exception as error:
                 print('Camera feed failed')
                 print(error)

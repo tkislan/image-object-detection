@@ -4,12 +4,15 @@ import time
 from typing import List
 
 from image_object_detection.camera.image import CameraImageContainer
+from image_object_detection.config.graph import GRAPH_PATH
 from image_object_detection.detection.config import TENSORRT
 from image_object_detection.detection.detection_result import DetectionResult
 from image_object_detection.utils.base_inference import BaseInferenceWrapper
+from image_object_detection.video.video_output_manager import VideoOutputManager
 from image_object_detection.workers.base import BaseWorker
 from image_object_detection.workers.camera import CameraFeedWorker
 from image_object_detection.workers.detection import DetectionWorker
+from image_object_detection.workers.video import VideoWorker
 from image_object_detection.workers.visualizer import VisualizerWorker
 
 # Model used for inference
@@ -29,44 +32,49 @@ TRT_PREDICTION_LAYOUT = {
 
 def get_inference_wrapper() -> BaseInferenceWrapper:
     if TENSORRT == True:
-        import image_object_detection.utils.trt_inference as trt_inference_utils # TRT inference wrappers
+        from image_object_detection.utils.trt_inference import TRTInference
 
-        return trt_inference_utils.TRTInference('/opt/models/engine.bin')
+        return TRTInference(GRAPH_PATH)
     else:
-        import image_object_detection.utils.inference as inference_utils # TF inference wrappers
-        return inference_utils.TensorflowInference('/opt/models/graph.pb')
+        from image_object_detection.utils.inference import TensorflowInference
+
+        return TensorflowInference(GRAPH_PATH)
 
 def main():
     print('initializing session')
     inference_wrapper = get_inference_wrapper()
     print('initialization done')
 
-    QUEUE_MAXSIZE_PER_CAMERA = 5
-    camera_urls = ['rtsp://admin:Hikvision@localhost:5554/ch1/main/av_stream']
+    QUEUE_MAXSIZE_PER_CAMERA = 1
+    camera_urls = [('some_camera', 'rtsp://admin:Hikvision@localhost:5554/ch1/main/av_stream')]
     # camera_urls = [
     #     'rtsp://admin:Hikvision@192.168.1.200:554/ch1/main/av_stream',
     #     'rtsp://admin:Hikvision@192.168.1.201:554/ch1/main/av_stream',
     # ]
 
+    video_output_manager = VideoOutputManager(max_fps=10)
+
     image_queue: 'queue.Queue[CameraImageContainer]' = queue.Queue(maxsize=QUEUE_MAXSIZE_PER_CAMERA * len(camera_urls))
     result_queue: 'queue.Queue[DetectionResult]' = queue.Queue()
+    visualized_queue: 'queue.Queue[DetectionResult]' = queue.Queue()
 
     workers: List[BaseWorker] = [
-        *[CameraFeedWorker(camera_url, image_queue) for camera_url in camera_urls], 
-        VisualizerWorker(result_queue), 
+        *[CameraFeedWorker(camera_name, camera_url, image_queue) for camera_name, camera_url in camera_urls],
         DetectionWorker(inference_wrapper, image_queue, result_queue),
+        VisualizerWorker(result_queue, visualized_queue),
+        VideoWorker(video_output_manager, visualized_queue)
     ]
 
     for worker in workers:
         worker.start()
-        if isinstance(worker, CameraFeedWorker):
-            worker.enable_read()
     
-    print('starting wait')
-    time.sleep(3)
+    # print('starting wait')
+    # time.sleep(3)
 
     try:
-        time.sleep(30)
+        # time.sleep(30)
+        time.sleep(60)
+        # time.sleep(120)
     except KeyboardInterrupt:
         pass
     except Exception as error:
@@ -78,6 +86,9 @@ def main():
     
     for worker in workers:
         worker.join()
+    
+    from datetime import datetime
+    print(f'Finished: {datetime.now().strftime("%Y-%m-%dT%H-%M-%S")}')
 
 
 if __name__ == "__main__":
